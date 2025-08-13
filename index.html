@@ -183,7 +183,7 @@
         <span class="small"
           >· 형식:
           <code
-            >Description[TAB]Lvl[TAB]I.S[TAB]모드(OR/AND)[TAB]품번합산(Y/N)</code
+            >Description[TAB]Lvl[TAB]I.S[TAB]모드(OR/AND)[TAB]품번합산(Y/N)[TAB]기준합산(Y/N)[TAB]조건사용(Y/N)</code
           >
         </span>
         <button id="presetSave">사전설정 저장</button>
@@ -559,6 +559,12 @@ CAS Assembly	1	OK	OR	N"
       </select>`;
     }
 
+    function fmtSign(n) {
+      const v = Number(n);
+      if (!isFinite(v) || Math.abs(v) < 1e-12) return "0";
+      return v > 0 ? `+${v}` : `-${Math.abs(v)}`;
+    }
+
     let lastResult = [];
     function renderTable(rows, defaults) {
       lastResult = rows.slice();
@@ -604,15 +610,16 @@ CAS Assembly	1	OK	OR	N"
         const rowSaved = perCondMap[rk] || {};
         const partSaved = perCondMap[pKey] || {};
         const rowCfg = {
-          enabled: rowSaved.enabled ?? false,
-          lvl: rowSaved.lvl ?? preset.lvl ?? defaults.lvlReq ?? "",
-          isv: rowSaved.isv ?? preset.isv ?? defaults.isReq ?? "",
-          mode: rowSaved.mode ?? preset.mode ?? defaults.condMode ?? "OR",
+          enabled: rowSaved.enabled ?? preset.enabled ?? false,          // ★ preset.enabled 반영
+          lvl:     rowSaved.lvl ?? preset.lvl ?? defaults.lvlReq ?? "",
+          isv:     rowSaved.isv ?? preset.isv ?? defaults.isReq ?? "",
+          mode:    rowSaved.mode ?? preset.mode ?? defaults.condMode ?? "OR",
         };
         const partCfg = {
           aggregate: partSaved.aggregate ?? preset.aggregate ?? false,
-          baseMerge: partSaved.baseMerge ?? false,
+          baseMerge: partSaved.baseMerge ?? preset.baseMerge ?? false,   // ★ preset.baseMerge 반영
         };
+
 
         html += `<tr data-rk="${rk}" data-pkey="${pKey}" data-desc="${keyDesc(
           r["디스크립션"]
@@ -620,16 +627,17 @@ CAS Assembly	1	OK	OR	N"
         cols.forEach((c) => {
           if (c === "No.") html += `<td>${i + 1}</td>`;
           else if (c === "판정") {
-            const cls =
-              r[c] === "OK"
-                ? "ok"
-                : String(r[c]).startsWith("+")
-                ? "pos"
-                : "neg";
-            html += `<td class="${cls}">${r[c]}</td>`;
-          } else if (["기준수량", "제출수량", "차이"].includes(c)) {
-            html += `<td>${Number.isFinite(r[c]) ? r[c] : r[c]}</td>`;
-          } else if (c === "조건") {
+            const isOk = String(r[c]).toUpperCase() === "OK";
+            html += `<td class="${isOk ? "ok" : "neg"}">${isOk ? "OK" : "NG"}</td>`;
+          } else if (["기준수량", "제출수량"].includes(c)) {
+              html += `<td>${r[c]}</td>`;
+            }
+            else if (c === "차이") {
+              const v = Number(r[c]) || 0;
+              const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
+              html += `<td class="${cls}">${fmtSign(v)}</td>`;
+            
+} else if (c === "조건") {
             html += `<td>${r["_cond"] || ""}</td>`;
           } else if (c === "확인") {
             html += `<td style="text-align:center"><input type="checkbox" class="rowchk" data-key="${
@@ -883,16 +891,14 @@ outEl.querySelectorAll(".rowchk").forEach((cb) => {
           const partSaved = perCondMap[pKey] || null;
           const preset = descPresets[keyDesc(br.desc)] || {};
           return {
-            enabled: rowSaved ? !!rowSaved.enabled : false,
-            lvl: rowSaved ? rowSaved.lvl ?? "" : preset.lvl ?? "",
-            isv: rowSaved ? rowSaved.isv ?? "" : preset.isv ?? "",
-            mode: rowSaved ? rowSaved.mode ?? "OR" : preset.mode ?? "OR",
-            aggregate: !!(
-              (partSaved && partSaved.aggregate) ||
-              preset.aggregate
-            ),
-            baseMerge: !!(partSaved && partSaved.baseMerge),
+            enabled: rowSaved ? !!rowSaved.enabled : !!preset.enabled,     // ★
+            lvl:     rowSaved ? (rowSaved.lvl ?? "") : (preset.lvl ?? ""),
+            isv:     rowSaved ? (rowSaved.isv ?? "") : (preset.isv ?? ""),
+            mode:    rowSaved ? (rowSaved.mode ?? "OR") : (preset.mode ?? "OR"),
+            aggregate: !!((partSaved && partSaved.aggregate) || preset.aggregate),
+            baseMerge: !!((partSaved && partSaved.baseMerge) || preset.baseMerge), // ★
           };
+
         }
 
         let result = [];
@@ -1076,25 +1082,25 @@ outEl.querySelectorAll(".rowchk").forEach((cb) => {
 
     /* ===== 사전설정 ===== */
     function parsePresetText(txt) {
-      const lines = txt
-        .replace(/\r/g, "")
-        .trim()
-        .split("\n")
-        .filter((x) => x.trim() !== "");
+      const lines = txt.replace(/\r/g, "").trim().split("\n").filter(x => x.trim() !== "");
       const map = {};
       for (const line of lines) {
         const cols = line.split("\t");
         const desc = (cols[0] || "").trim();
         if (!desc) continue;
-        const lvl = (cols[1] || "").trim();
-        const isv = (cols[2] || "").trim();
-        const mode =
-          (cols[3] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
-        const agg = /^(Y|YES|TRUE|1)$/i.test((cols[4] || "").trim());
-        map[keyDesc(desc)] = { lvl, isv, mode, aggregate: agg };
+
+        const lvl  = (cols[1] || "").trim();
+        const isv  = (cols[2] || "").trim();
+        const mode = ((cols[3] || "OR").trim().toUpperCase() === "AND") ? "AND" : "OR";
+        const agg  = /^(Y|YES|TRUE|1)$/i.test((cols[4] || "").trim()); // 품번합산
+        const base = /^(Y|YES|TRUE|1)$/i.test((cols[5] || "").trim()); // 기준합산 ★추가
+        const en   = /^(Y|YES|TRUE|1)$/i.test((cols[6] || "").trim()); // 조건사용 ★추가
+
+        map[keyDesc(desc)] = { lvl, isv, mode, aggregate: agg, baseMerge: base, enabled: en }; // ★추가
       }
       return map;
     }
+
     document.getElementById("presetSave").addEventListener("click", () => {
       const txt = document.getElementById("presetArea").value || "";
       descPresets = parsePresetText(txt);
@@ -1110,13 +1116,14 @@ outEl.querySelectorAll(".rowchk").forEach((cb) => {
           v.isv || "",
           v.mode || "OR",
           v.aggregate ? "Y" : "N",
+          v.baseMerge ? "Y" : "N",     // ★ 기준합산
+          v.enabled   ? "Y" : "N",     // ★ 조건사용
         ].join("\t")
       );
-      document.getElementById("presetArea").value = rows.length
-        ? rows.join("\n")
-        : "";
+      document.getElementById("presetArea").value = rows.length ? rows.join("\n") : "";
       alert("저장된 사전설정을 불러왔습니다.");
     });
+
     document.getElementById("presetClear").addEventListener("click", () => {
       localStorage.removeItem(PRESET_STORE_KEY);
       descPresets = {};
