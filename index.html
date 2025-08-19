@@ -737,21 +737,23 @@
         )}">`;
         cols.forEach((c) => {
           if (c === "No.") {
-            html += `<td>${i + 1}</td>`;
+            html += `<td style="text-align:center">${i + 1}</td>`;
             return;
           }
           if (["기준수량", "제출수량"].includes(c)) {
-            html += `<td>${r[c]}</td>`;
+            html += `<td style="text-align:center">${r[c]}</td>`;
             return;
           }
           if (c === "차이") {
             const v = Number(r[c]) || 0;
             const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
-            html += `<td class="${cls}">${fmtSign(v)}</td>`;
+            html += `<td class="${cls}" style="text-align:center">${fmtSign(
+              v
+            )}</td>`;
             return;
           }
           if (c === "조건") {
-            html += `<td>${r["_cond"] || ""}</td>`;
+            html += `<td style="text-align:center">${r["_cond"] || ""}</td>`;
             return;
           }
           if (!agg && c === "조건사용") {
@@ -793,7 +795,9 @@
           if (c === "판정") {
             const text = String(r[c] ?? "");
             const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
-            html += `<td class="${cls}">${esc(text)}</td>`;
+            html += `<td class="${cls}" style="text-align:center">${esc(
+              text
+            )}</td>`;
             return;
           } else if (c === "확인") {
             html += `<td style="text-align:center">
@@ -804,7 +808,7 @@
             return;
           }
 
-          html += `<td>${r[c] ?? ""}</td>`;
+          html += `<td style="text-align:center">${r[c] ?? ""}</td>`;
         });
         html += "</tr>";
       });
