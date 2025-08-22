@@ -152,6 +152,19 @@
           id="subm"
           placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
         ></textarea>
+
+        <!-- ▼ 헤더 정리 버튼: 지우기 왼쪽 -->
+        <button
+          type="button"
+          class="clear-btn"
+          data-target="subm"
+          data-action="normalize"
+          aria-label="제출 목록 헤더 정리"
+          style="right: 78px"
+        >
+          헤더 정리
+        </button>
+
         <button
           type="button"
           class="clear-btn"
@@ -174,7 +187,6 @@
         ><input type="checkbox" id="mergeBaseDup" /> 기준 품번 중복 통합(수량
         합산)</label
       >
-      <!--<span class="small">· “중복 통합”을 켜면 기준은 품번만으로 합치고 디스크립션은 비워 품번 매칭으로 비교합니다.</span>-->
     </div>
 
     <div class="bar" style="gap: 12px; margin-bottom: 8px">
@@ -214,7 +226,6 @@
       <label
         ><input type="checkbox" id="aggCondOnly" /> 조건 충족 행만 합산</label
       >
-      <!--<span class="small">* “조건 충족 행만 합산”은 전역 추가 조건 사용.</span>-->
     </div>
 
     <!-- 사전설정 -->
@@ -247,8 +258,8 @@
       <textarea
         id="presetArea"
         placeholder="예)
-    ALT Assembly	4		OR	Y
-    CAS Assembly	1	OK	OR	N"
+ALT Assembly	4		OR	Y
+CAS Assembly	1	OK	OR	N"
       ></textarea>
     </details>
 
@@ -266,13 +277,11 @@
       <label style="margin-left: auto"
         ><input type="checkbox" id="showFailedCond" /> 조건 불일치도 표시</label
       >
-      <!-- ↓ 요 두 줄 추가 -->
       <label><input type="checkbox" id="filterOk" /> OK만</label>
       <label><input type="checkbox" id="filterNg" /> NG만</label>
       <label><input type="checkbox" id="showCheckedOnly" /> 확인 </label>
     </div>
 
-    <!-- 일괄 체크/해제 -->
     <div
       class="bar"
       style="margin-bottom: 6px; gap: 6px; justify-content: flex-end"
@@ -332,7 +341,7 @@
     function normalizeHeader(h) {
       return String(h || "")
         .toUpperCase()
-        .replace(/[.\s]/g, "");
+        .replace(/[.\s/_()\-]/g, "");
     }
     function parseLooseRow(line) {
       const m = line.trim().match(/^(\S+)\s+(\S+)\s*(.*)$/);
@@ -372,6 +381,7 @@
             "PART",
             "P/N",
             "PN",
+            "PART NO" /* ← 추가: Part No도 헤더 후보로 인정 */,
             "수량",
             "QTY",
             "QUANTITY",
@@ -428,7 +438,8 @@
         return -1;
       };
 
-      const idxPart = findByLabel("품번", "PART", "P/N", "PN");
+      /* ← 변경: Part No도 part 컬럼으로 인정 */
+      const idxPart = findByLabel("품번", "PART", "P/N", "PN", "PART NO");
       const idxQty = findByLabel("수량", "QTY", "QUANTITY");
       const idxDesc = findByLabel("디스크립션", "DESCRIPTION", "DESC");
       const idxLvl = findByCustom(lvlColName);
@@ -643,19 +654,11 @@
     <option value="4" ${sel === "4" ? "selected" : ""}>4</option>
   </select>`;
     }
-    // function fmtSign(n){
-    //   const v = Number(n);
-    //   if (!isFinite(v)) return "0.00";
-    //   const abs = Math.abs(v);
-    //   if (abs < 1e-12) return "0.00";
-    //   const s = abs.toFixed(2);
-    //   return v > 0 ? `+${s}` : `-${s}`;
-    // }
 
     function fmtSign(v) {
       if (v == null || isNaN(v)) return "";
-      const num = Number(v);
-      return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+      const numV = Number(v);
+      return Number.isInteger(numV) ? numV.toString() : numV.toFixed(2);
     }
 
     let lastResult = [];
@@ -671,7 +674,6 @@
         ? rows.filter((r) => !checkMap[r._key])
         : rows;
 
-      // 판정 필터 (둘 다 체크 or 둘 다 미체크면 전체 표시)
       filtered = filtered.filter((r) => {
         if (showOKOnly && !showNGOnly) return r["판정"] === "OK";
         if (showNGOnly && !showOKOnly) return r["판정"] === "NG";
@@ -737,23 +739,21 @@
         )}">`;
         cols.forEach((c) => {
           if (c === "No.") {
-            html += `<td style="text-align:center">${i + 1}</td>`;
+            html += `<td>${i + 1}</td>`;
             return;
           }
           if (["기준수량", "제출수량"].includes(c)) {
-            html += `<td style="text-align:center">${r[c]}</td>`;
+            html += `<td>${r[c]}</td>`;
             return;
           }
           if (c === "차이") {
             const v = Number(r[c]) || 0;
             const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
-            html += `<td class="${cls}" style="text-align:center">${fmtSign(
-              v
-            )}</td>`;
+            html += `<td class="${cls}">${fmtSign(v)}</td>`;
             return;
           }
           if (c === "조건") {
-            html += `<td style="text-align:center">${r["_cond"] || ""}</td>`;
+            html += `<td>${r["_cond"] || ""}</td>`;
             return;
           }
           if (!agg && c === "조건사용") {
@@ -795,9 +795,7 @@
           if (c === "판정") {
             const text = String(r[c] ?? "");
             const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
-            html += `<td class="${cls}" style="text-align:center">${esc(
-              text
-            )}</td>`;
+            html += `<td class="${cls}">${esc(text)}</td>`;
             return;
           } else if (c === "확인") {
             html += `<td style="text-align:center">
@@ -808,7 +806,7 @@
             return;
           }
 
-          html += `<td style="text-align:center">${r[c] ?? ""}</td>`;
+          html += `<td>${r[c] ?? ""}</td>`;
         });
         html += "</tr>";
       });
@@ -819,7 +817,6 @@
 
       bindRowHover(outEl.querySelector("table"));
 
-      // 행 체크 핸들러 (필터 켠 상태에서는 행만 숨김)
       outEl.querySelectorAll(".rowchk").forEach((cb) => {
         cb.addEventListener("change", () => {
           const k = cb.dataset.key;
@@ -873,61 +870,60 @@
         });
       }
 
-      // CSV 저장
-      // const dl = document.getElementById("dl");
-      // dl.style.display = rows.length ? "inline-block" : "none";
-      // dl.onclick = () => {
-      //   const cols = [
-      //     "No.",
-      //     "품번",
-      //     "디스크립션",
-      //     "기준수량",
-      //     "제출수량",
-      //     "차이",
-      //     "판정",
-      //     "조건",
-      //     "확인",
-      //     "기준합산",
-      //     "품번합산",
-      //   ];
-      //   const body = (
-      //     document.getElementById("showCheckedOnly").checked
-      //       ? rows.filter((r) => !checkMap[r._key])
-      //       : rows
-      //   )
-      //     .map((r, i) => {
-      //       const pKey = String(r["품번"] || "")
-      //         .toUpperCase()
-      //         .replace(/\s+/g, "");
-      //       const partCfg = perCondMap[pKey] || {};
-      //       return [
-      //         i + 1,
-      //         r["품번"],
-      //         r["디스크립션"],
-      //         r["기준수량"],
-      //         r["제출수량"],
-      //         r["차이"],
-      //         r["판정"],
-      //         r["_cond"] || "",
-      //         checkMap[r._key] ? "Y" : "",
-      //         partCfg.baseMerge ? "Y" : "",
-      //         partCfg.aggregate ? "Y" : "",
-      //       ]
-      //         .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
-      //         .join(",");
-      //     })
-      //     .join("\n");
-      //   const csv = cols.map((s) => `"${s}"`).join(",") + "\n" + body;
-      //   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      //   const url = URL.createObjectURL(blob);
-      //   const a = document.createElement("a");
-      //   a.href = url;
-      //   a.download = "비교결과.csv";
-      //   document.body.appendChild(a);
-      //   a.click();
-      //   a.remove();
-      //   URL.revokeObjectURL(url);
-      // };
+      const dl = document.getElementById("dl");
+      dl.style.display = rows.length ? "inline-block" : "none";
+      dl.onclick = () => {
+        const cols = [
+          "No.",
+          "품번",
+          "디스크립션",
+          "기준수량",
+          "제출수량",
+          "차이",
+          "판정",
+          "조건",
+          "확인",
+          "기준합산",
+          "품번합산",
+        ];
+        const body = (
+          document.getElementById("showCheckedOnly").checked
+            ? rows.filter((r) => !checkMap[r._key])
+            : rows
+        )
+          .map((r, i) => {
+            const pKey = String(r["품번"] || "")
+              .toUpperCase()
+              .replace(/\s+/g, "");
+            const partCfg = perCondMap[pKey] || {};
+            return [
+              i + 1,
+              r["품번"],
+              r["디스크립션"],
+              r["기준수량"],
+              r["제출수량"],
+              r["차이"],
+              r["판정"],
+              r["_cond"] || "",
+              checkMap[r._key] ? "Y" : "",
+              partCfg.baseMerge ? "Y" : "",
+              partCfg.aggregate ? "Y" : "",
+            ]
+              .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
+              .join(",");
+          })
+          .join("\n");
+        const csv = cols.map((s) => `"${s}"`).join(",") + "\n" + body;
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "비교결과.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      };
     }
 
     /* ===== 실행 흐름 ===== */
@@ -1012,11 +1008,8 @@
         function onJudgeFilterChange(e) {
           const okEl = document.getElementById("filterOk");
           const ngEl = document.getElementById("filterNg");
-          // 상호배타: 하나를 켰으면 다른 하나는 자동 끔
           if (e && e.target === okEl && okEl.checked) ngEl.checked = false;
           if (e && e.target === ngEl && ngEl.checked) okEl.checked = false;
-
-          // 저장 및 재렌더
           if (typeof scheduleSave === "function") scheduleSave();
           renderTable(lastResult, { enabled: false });
         }
@@ -1028,7 +1021,6 @@
           .getElementById("filterNg")
           ?.addEventListener("change", onJudgeFilterChange);
 
-        // 기준합산 체크된 품번은 1행만 남김
         baseRows = baseRows.filter((br) => {
           const pKey = String(br.part || "")
             .toUpperCase()
@@ -1099,7 +1091,6 @@
             });
           }
         } else {
-          // 개별 매칭
           const out = [];
           const usedByKey = new Map();
           function takeNext(rows, cfg, used) {
@@ -1127,7 +1118,6 @@
             const srec = subBucket.get(part);
             if (!srec) continue;
 
-            // 기준합산만 켠 경우: 제출 전체 합산
             if (!cfg.aggregate && cfg.baseMerge) {
               const target =
                 document.getElementById("useDesc").checked &&
@@ -1158,7 +1148,6 @@
               continue;
             }
 
-            // 제출 품번합산
             if (cfg.aggregate) {
               const target =
                 document.getElementById("useDesc").checked &&
@@ -1197,7 +1186,6 @@
               continue;
             }
 
-            // 일반 매칭
             let rows = [],
               ukey = `${part}|*`;
             if (
@@ -1327,12 +1315,10 @@
         perCondMap = {};
         checkMap = {};
 
-        // 화면 체크박스 즉시 해제
         document
           .querySelectorAll("#out .rowchk")
           .forEach((cb) => (cb.checked = false));
 
-        // 표 재렌더
         renderTable(Array.isArray(lastResult) ? lastResult : [], {
           enabled: false,
         });
@@ -1452,41 +1438,181 @@
     });
     loadDraft();
 
-    // 텍스트영역 우측하단 "지우기" 버튼
+    /* === [교체 완료] 제출 헤더 정리: 5열 고정 추출 === */
+    function normalizeTextareaToNeededColumns(textareaId) {
+      const ta = document.getElementById(textareaId);
+      if (!ta) return;
+      const raw = ta.value || "";
+      if (!raw.trim()) {
+        alert("정리할 데이터가 없습니다.");
+        return;
+      }
+
+      const lines = raw
+        .replace(/\r/g, "")
+        .split("\n")
+        .filter((x) => x.trim() !== "");
+      if (!lines.length) {
+        alert("해석 가능한 행이 없습니다.");
+        return;
+      }
+      // (1) 헤더 줄 찾기: 첫 번째 비어있지 않은 줄
+      const headIdx = lines.findIndex((x) => /\S/.test(x));
+      const headerLine = lines[headIdx];
+
+      // (2) 구분자 고정 규칙: 탭 > 세미콜론 > 콤마 > (최후) 공백
+      let sep = "\t";
+      if (headerLine.includes("\t")) sep = "\t";
+      else if (headerLine.includes(";")) sep = ";";
+      else if (headerLine.includes(",")) sep = ",";
+      else sep = null; // 정말로 구분자가 없을 때만 공백 분리
+
+      // (3) 분할 함수 (선택된 sep만 사용)
+      const splitWithSep = (s) =>
+        sep ? s.split(sep).map((x) => x.trim()) : s.trim().split(/\s+/);
+
+      // (4) 헤더 정규화 함수와 키
+      const normalizeHeaderLoose = (h) =>
+        String(h || "")
+          .toUpperCase()
+          .replace(/[.\s/_()\-]/g, "");
+
+      const HEAD_KEYS = [
+        "PARTNO",
+        "PART",
+        "P/N",
+        "PN",
+        "PARTNUMBER",
+        "품번",
+        "QTY",
+        "QUANTITY",
+        "수량",
+        "DESCRIPTION",
+        "DESC",
+        "디스크립션",
+        "LVL",
+        "IS",
+        "I.S",
+      ];
+
+      // (5) 헤더 셀/정규화본
+      const headCells = splitWithSep(lines[headIdx]);
+      const headNorms = headCells.map(normalizeHeaderLoose);
+
+      const findIndex = (targets) => {
+        for (let i = 0; i < headNorms.length; i++) {
+          const h = headNorms[i];
+          if (targets.some((t) => h === t)) return i;
+          if (targets.some((t) => h.startsWith(t))) return i;
+          if (targets.some((t) => h.includes(t))) return i;
+        }
+        return -1;
+      };
+
+      const idxPart = findIndex([
+        "PARTNO",
+        "P/N",
+        "PN",
+        "PART",
+        "PARTNUMBER",
+        "품번",
+      ]);
+      const idxQty = findIndex(["QTY", "QUANTITY", "수량"]);
+      const idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
+      const idxLvl = findIndex(["LVL"]);
+      const idxIS = findIndex(["IS", "I.S"]);
+
+      if (idxPart < 0 || idxQty < 0) {
+        alert(
+          "필수 헤더(Part No, Qty)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
+        );
+        return;
+      }
+
+      const outHeader = ["Part No", "Qty", "Description", "Lvl", "I.S"].join(
+        "\t"
+      );
+      const body = [];
+      for (let r = headIdx + 1; r < lines.length; r++) {
+        const row = lines[r];
+        if (!row || !row.trim()) continue;
+        const cells = splitWithSep(row, sep);
+        const get = (i) => (i >= 0 && i < cells.length ? cells[i] : "");
+        const part = String(get(idxPart)).trim();
+        const qty = String(get(idxQty)).trim();
+        const desc = String(get(idxDesc) || "").trim();
+        let lvl = String(get(idxLvl) || "").trim();
+        // 숫자형 0.1, 0.2 → 들여쓰기 표기로 변환
+        if (/^0\.\d+$/.test(lvl)) {
+          const depth = parseInt(lvl.split(".")[1], 10);
+          lvl = ".".repeat(depth) + depth;
+        }
+
+        const isv = String(get(idxIS) || "").trim();
+        if (!part && !qty) continue;
+        body.push([part, qty, desc, lvl, isv].join("\t"));
+      }
+      if (!body.length) {
+        alert("본문 데이터가 없습니다.");
+        return;
+      }
+
+      ta.value = outHeader + "\n" + body.join("\n");
+      if (typeof scheduleSave === "function") scheduleSave();
+      ta.focus();
+    }
+
+    /* === 지우기/정리 통합 핸들러 === */
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".clear-btn");
       if (!btn) return;
 
       const id = btn.getAttribute("data-target"); // "base" | "subm"
+      const act = btn.dataset.action; // undefined | "normalize"
+
+      if (act === "normalize") {
+        if (id !== "subm") return;
+        normalizeTextareaToNeededColumns(id);
+        return;
+      }
+
       const ta = document.getElementById(id);
       if (!ta) return;
-
-      ta.value = ""; // 화면 비움
+      ta.value = "";
       ta.focus();
-
-      // 자동저장(draft)도 함께 비움
       try {
         if (id === "base") localStorage.setItem(DRAFT_KEYS.base, "");
         if (id === "subm") localStorage.setItem(DRAFT_KEYS.subm, "");
       } catch (e) {}
-
-      // 기존 autosave 흐름과도 동기화
       if (typeof scheduleSave === "function") scheduleSave();
     });
 
-    /* === 사전설정 패널(디스클로저) 열림 상태 저장 === */
+    /* ===== preset textarea: Tab 입력 가능 ===== */
+    (function enableTabInTextarea() {
+      const el = document.getElementById("presetArea");
+      if (!el) return;
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = el.selectionStart,
+            end = el.selectionEnd,
+            val = el.value;
+          el.value = val.slice(0, start) + "\t" + val.slice(end);
+          el.selectionStart = el.selectionEnd = start + 1;
+          scheduleSave();
+        }
+      });
+    })();
+
+    /* ===== 사전설정 패널 열림 상태 저장 ===== */
     (function keepPresetOpenState() {
       const KEY = "preset_panel_open_v1";
       const details = document.getElementById("presetPanel");
       if (!details) return;
-
-      // 복원
       try {
         const v = localStorage.getItem(KEY);
         if (v !== null) details.open = v === "1";
       } catch (e) {}
-
-      // 변경 시 저장
       details.addEventListener("toggle", () => {
         try {
           localStorage.setItem(KEY, details.open ? "1" : "0");
@@ -1515,23 +1641,6 @@
       });
       table.addEventListener("mouseleave", clear);
     }
-
-    /* ===== preset textarea: Tab 입력 가능 ===== */
-    (function enableTabInTextarea() {
-      const el = document.getElementById("presetArea");
-      if (!el) return;
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          e.preventDefault();
-          const start = el.selectionStart,
-            end = el.selectionEnd,
-            val = el.value;
-          el.value = val.slice(0, start) + "\t" + val.slice(end);
-          el.selectionStart = el.selectionEnd = start + 1;
-          scheduleSave();
-        }
-      });
-    })();
 
     /* ===== 전역 옵션 UI 숨김 ===== */
     if (typeof DISABLE_GLOBALS !== "undefined" && DISABLE_GLOBALS) {
