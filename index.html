@@ -1324,7 +1324,7 @@ CAS Assembly	N	N	Y	OR	1	70"
             yn(!!it.baseMerge),
             yn(!!it.aggregate),
             yn(!!it.enabled),
-            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
+            (String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR"),
             it.lvl ?? "",
             it.isv ?? "",
           ].join("\t")
@@ -1675,3 +1675,4 @@ CAS Assembly	N	N	Y	OR	1	70"
     }
   </script>
 </html>
+
