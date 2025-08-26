@@ -115,11 +115,10 @@
     .ta-footer {
       margin-top: 6px;
       display: flex;
-      justify-content: space-between; /* 좌측엔 설명글, 우측엔 버튼 */
+      justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap; /* 화면 좁을 때 줄바꿈 허용 */
+      flex-wrap: wrap;
     }
-
     .ta-actions {
       margin-top: 8px;
       display: flex;
@@ -171,9 +170,7 @@
         ></textarea>
       </div>
       <div class="ta-footer">
-        <div class="small">
-          <!-- 필요 시 설명 추가 -->
-        </div>
+        <div class="small"></div>
         <div class="ta-actions">
           <button
             type="button"
@@ -343,26 +340,18 @@ CAS Assembly	N	N	Y	OR	1	70"
     /* 전역 옵션 숨김 스위치 */
     const DISABLE_GLOBALS = true;
 
-    /* === 항상 초기화로 시작 ===
-     - 매 로드마다 붙여넣기/옵션/체크 상태를 싹 비움
-     - 프리셋(JSON 서버에서 불러오는 값)은 건드리지 않음
-     - 테스트 때 기존 기록을 유지하고 싶으면 URL에 ?keep=1 붙여서 접속
-   */
+    /* === 항상 초기화로 시작 === */
     (function alwaysFreshStart() {
       try {
         const keep = new URLSearchParams(location.search).has("keep");
         if (keep) return;
 
-        // 1) 드래프트(붙여넣기/옵션 스냅샷) 제거
         localStorage.removeItem(DRAFT_KEYS.base);
         localStorage.removeItem(DRAFT_KEYS.subm);
         localStorage.removeItem(DRAFT_KEYS.opts);
-
-        // 2) 행 체크/개별 조건 맵 제거
         localStorage.removeItem(CHECK_STORE_KEY);
         localStorage.removeItem(PERCOND_STORE_KEY);
 
-        // 3) 화면 쪽도 안전하게 초기화
         const $base = document.getElementById("base");
         const $subm = document.getElementById("subm");
         if ($base) $base.value = "";
@@ -373,7 +362,7 @@ CAS Assembly	N	N	Y	OR	1	70"
           $out.style.display = "none";
         }
       } catch (e) {
-        // 초기화 실패해도 작업은 진행되도록 조용히 무시
+        /* noop */
       }
     })();
 
@@ -631,7 +620,7 @@ CAS Assembly	N	N	Y	OR	1	70"
 
     let perCondMap = loadJson(PERCOND_STORE_KEY, "{}");
     let checkMap = loadJson(CHECK_STORE_KEY, "{}");
-    let descPresets = loadJson(PRESET_STORE_KEY, "{}"); // 현재 textarea → parse → 여기에 반영해 사용
+    let descPresets = loadJson(PRESET_STORE_KEY, "{}");
 
     /* ===== 키/조건 ===== */
     function rowKey(part, occIdx) {
@@ -980,6 +969,7 @@ CAS Assembly	N	N	Y	OR	1	70"
       .addEventListener("change", () =>
         renderTable(lastResult, { enabled: false })
       );
+
     function getVisibleRows() {
       return document.getElementById("showCheckedOnly").checked
         ? lastResult.filter((r) => !checkMap[r._key])
@@ -1002,17 +992,32 @@ CAS Assembly	N	N	Y	OR	1	70"
       .getElementById("uncheckAll")
       .addEventListener("click", () => bulkCheck(false));
 
+    // ✅ filterOk / filterNg 전역 1회 바인딩 (runCompare 내부 중복 제거)
+    function onJudgeFilterChange(e) {
+      const okEl = document.getElementById("filterOk");
+      const ngEl = document.getElementById("filterNg");
+      if (e && e.target === okEl && okEl.checked) ngEl.checked = false;
+      if (e && e.target === ngEl && ngEl.checked) okEl.checked = false;
+      if (typeof scheduleSave === "function") scheduleSave();
+      renderTable(lastResult, { enabled: false });
+    }
+    document
+      .getElementById("filterOk")
+      ?.addEventListener("change", onJudgeFilterChange);
+    document
+      .getElementById("filterNg")
+      ?.addEventListener("change", onJudgeFilterChange);
+
     function runCompare() {
       try {
-        // textarea → descPresets 즉시 반영
         const pa = document.getElementById("presetArea");
         if (pa) {
           descPresets = parsePresetText(
             pa.value || ""
-          ); /* saveJson(PRESET_STORE_KEY,descPresets); */
+          ); /* saveJson(PRESET_STORE_KEY, descPresets); */
         }
 
-        const useDesc = document.getElementById("useDesc").checked;
+        const useDesc = document.getElementById("useDesc").checked; // (읽기용)
         const mergeDup = document.getElementById("mergeBaseDup").checked;
         const showFail = (document.getElementById(
           "showFailedCond"
@@ -1058,21 +1063,6 @@ CAS Assembly	N	N	Y	OR	1	70"
           occ.set(it.part, c);
           return { part: it.part, desc: it.desc, occIdx: c };
         });
-
-        function onJudgeFilterChange(e) {
-          const okEl = document.getElementById("filterOk");
-          const ngEl = document.getElementById("filterNg");
-          if (e && e.target === okEl && okEl.checked) ngEl.checked = false;
-          if (e && e.target === ngEl && ngEl.checked) okEl.checked = false;
-          if (typeof scheduleSave === "function") scheduleSave();
-          renderTable(lastResult, { enabled: false });
-        }
-        document
-          .getElementById("filterOk")
-          ?.addEventListener("change", onJudgeFilterChange);
-        document
-          .getElementById("filterNg")
-          ?.addEventListener("change", onJudgeFilterChange);
 
         baseRows = baseRows.filter((br) => {
           const pKey = String(br.part || "")
@@ -1296,14 +1286,12 @@ CAS Assembly	N	N	Y	OR	1	70"
         .split("\n")
         .map((s) => s.trimEnd())
         .filter((s) => s.trim() !== "");
-
       const smartSplit = (line) => {
         if (line.includes("\t")) return line.split("\t").map((s) => s.trim());
         if (line.includes(";")) return line.split(";").map((s) => s.trim());
         if (line.includes(",")) return line.split(",").map((s) => s.trim());
         return line.split(/\s{2,}/).map((s) => s.trim());
       };
-
       const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
 
       const map = {};
@@ -1311,8 +1299,7 @@ CAS Assembly	N	N	Y	OR	1	70"
         const cols = smartSplit(line);
         const desc = (cols[0] || "").trim();
         if (!desc) continue;
-
-        // 새 순서: desc, baseMerge, aggregate, enabled, mode, lvl, isv
+        // 순서: desc, baseMerge, aggregate, enabled, mode, lvl, isv
         const base = yn(cols[1]);
         const agg = yn(cols[2]);
         const en = yn(cols[3]);
@@ -1320,7 +1307,6 @@ CAS Assembly	N	N	Y	OR	1	70"
           (cols[4] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
         const lvl = (cols[5] || "").trim();
         const isv = (cols[6] || "").trim();
-
         map[keyDesc(desc)] = {
           baseMerge: base,
           aggregate: agg,
@@ -1336,7 +1322,6 @@ CAS Assembly	N	N	Y	OR	1	70"
     /* ===== 서버 프리셋 fetch → textarea 넣기 ===== */
     let _serverPresetCache = null;
     async function fetchRemotePresets() {
-      // 캐시 있으면 바로
       if (_serverPresetCache) return _serverPresetCache;
       const res = await fetch(REMOTE_PRESET_URL, { cache: "no-cache" });
       if (!res.ok)
@@ -1346,7 +1331,6 @@ CAS Assembly	N	N	Y	OR	1	70"
       return json;
     }
     function itemsToTSV(items) {
-      // JSON 항목을 TAB 구분 라인으로 변환(7열 보장)
       const yn = (b) => (b ? "Y" : "N");
       return (items || [])
         .map((it) =>
@@ -1370,9 +1354,7 @@ CAS Assembly	N	N	Y	OR	1	70"
         const tsv = itemsToTSV(items);
         const ta = document.getElementById("presetArea");
         ta.value = tsv ? tsv + "\n" : "";
-        // 필요시 즉시 내부 descPresets로 반영하고 싶으면 아래 2줄 주석 해제
-        // descPresets=parsePresetText(ta.value||"");
-        // saveJson(PRESET_STORE_KEY, descPresets);
+        // descPresets=parsePresetText(ta.value||""); saveJson(PRESET_STORE_KEY, descPresets);
         alert("서버 프리셋을 불러왔습니다.");
       } catch (e) {
         alert(
@@ -1445,7 +1427,6 @@ CAS Assembly	N	N	Y	OR	1	70"
         localStorage.setItem(DRAFT_KEYS.opts, JSON.stringify(snapshot));
       } catch (e) {}
     }
-
     function loadDraft() {
       try {
         const b = localStorage.getItem(DRAFT_KEYS.base);
@@ -1487,16 +1468,17 @@ CAS Assembly	N	N	Y	OR	1	70"
         }
       } catch (e) {}
     }
+
+    // ✅ 자동 저장 이벤트 등록 통합 (input/textarea는 input, select/checkbox는 change)
     let _draftTimer = null;
     function scheduleSave() {
       clearTimeout(_draftTimer);
       _draftTimer = setTimeout(saveDraft, 200);
     }
-    ["base", "subm", "presetArea"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener("input", scheduleSave);
-    });
-    [
+    const autoSaveIds = [
+      "base",
+      "subm",
+      "presetArea",
       "useDesc",
       "mergeBaseDup",
       "advCondEnabled",
@@ -1511,11 +1493,15 @@ CAS Assembly	N	N	Y	OR	1	70"
       "showFailedCond",
       "filterOk",
       "filterNg",
-    ].forEach((id) => {
+    ];
+    autoSaveIds.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
       const evt =
-        el.tagName === "SELECT" || el.type === "checkbox" ? "change" : "input";
+        el.tagName === "TEXTAREA" ||
+        (el.tagName === "INPUT" && el.type !== "checkbox")
+          ? "input"
+          : "change";
       el.addEventListener(evt, scheduleSave);
     });
 
