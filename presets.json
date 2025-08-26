@@ -107,7 +107,7 @@
           "mode": "OR",
           "aggregate": false,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "가스켓-응축기",
@@ -116,7 +116,7 @@
           "mode": "OR",
           "aggregate": false,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "워터박스 조립용 볼트",
@@ -125,7 +125,7 @@
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "워터박스 조립용 너트",
@@ -134,7 +134,7 @@
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "워터박스 조립용 플레인 와셔",
@@ -143,7 +143,7 @@
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "워터박스 U 패킹 (증발기)",
@@ -152,7 +152,7 @@
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "워터박스 U 패킹 (응축기)",
@@ -161,7 +161,7 @@
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
-          "enabled": false
+          "enabled": true
         },
         {
           "desc": "AS-ECO-SUPPORT-ATTA-TB",
