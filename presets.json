@@ -162,6 +162,42 @@
           "aggregate": true,
           "baseMerge": false,
           "enabled": false
+        },
+        {
+          "desc": "AS-ECO-SUPPORT-ATTA-TB",
+          "lvl": "",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": true,
+          "enabled": false
+        },
+        {
+          "desc": "SUPPORTER PLATE",
+          "lvl": "3",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": true,
+          "enabled": true
+        },
+        {
+          "desc": "ANGLE-PLATE",
+          "lvl": "3",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": true,
+          "enabled": true
+        },
+        {
+          "desc": "ANGLE-PLATE",
+          "lvl": "3",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": true,
+          "enabled": true
         }
       ]
     }
