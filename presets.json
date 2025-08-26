@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "updatedAt": "2025-08-26T00:00:00Z",
+  "types": {
+    "lube": {
+      "label": "급유",
+      "items": [
+        {
+          "desc": "명판 조립용 SCREW",
+          "lvl": "1",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "가스켓 조립볼트",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "가스켓(응축기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "워터박스 조립용 볼트",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "워터박스 조립용 너트",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "워터박스 조립용 플레이트 와셔",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "워터박스 패킹 (증발기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "워터박스 패킹 (응축기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": true
+        }
+      ]
+    },
+    "dry": {
+      "label": "무급유",
+      "items": [
+        {
+          "desc": "명판 조립용 SCREW",
+          "lvl": "1",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "가스켓 조립볼트",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "가스켓(응축기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "워터박스 조립용 볼트",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "워터박스 조립용 너트",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "워터박스 조립용 플레이트 와셔",
+          "lvl": "4",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "워터박스 패킹 (증발기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": false
+        },
+        {
+          "desc": "워터박스 패킹 (응축기)",
+          "lvl": "2",
+          "isv": "",
+          "mode": "OR",
+          "aggregate": true,
+          "baseMerge": false,
+          "enabled": false
+        }
+      ]
+    }
+  }
+}
