@@ -94,8 +94,7 @@
     }
     tr.rowhl {
       background: #fff3bf !important;
-    } /* 행 hover 하이라이트 */
-
+    }
     .ta-wrap {
       position: relative;
     }
@@ -145,6 +144,7 @@
         자동 제외됩니다.
       </div>
     </div>
+
     <div class="box">
       <b>② 제출 목록</b>
       <div class="ta-wrap">
@@ -152,8 +152,6 @@
           id="subm"
           placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
         ></textarea>
-
-        <!-- ▼ 헤더 정리 버튼: 지우기 왼쪽 -->
         <button
           type="button"
           class="clear-btn"
@@ -164,7 +162,6 @@
         >
           헤더 정리
         </button>
-
         <button
           type="button"
           class="clear-btn"
@@ -195,8 +192,8 @@
         조건(Lvl/I.S)</label
       >
       <label>Lvl 컬럼명 <input type="text" id="lvlCol" value="Lvl" /></label>
-      <label>
-        Lvl 입력값
+      <label
+        >Lvl 입력값
         <select id="lvlVal">
           <option value=""></option>
           <option value="1">1</option>
@@ -228,7 +225,7 @@
       >
     </div>
 
-    <!-- 사전설정 -->
+    <!-- 사전설정(서버 프리셋) -->
     <details
       id="presetPanel"
       class="box"
@@ -237,29 +234,36 @@
     >
       <summary class="bar" style="cursor: pointer">
         <b>사전설정(Description 기준)</b>
-        <span class="small">
-          · 형식:
+        <span class="small"
+          >· 형식:
           <code
             >Description / Lvl / I.S / 모드(OR/AND) / 품번합산(Y/N) /
-            기준합산(Y/N) / 조건사용(Y/N), TAB 구분</code
+            기준합산(Y/N) / 조건사용(Y/N)</code
           >
-        </span>
+          — TAB 구분</span
+        >
         <span class="small" style="margin-left: auto">눌러서 접기/펼치기</span>
       </summary>
 
-      <div class="bar" style="margin-top: 8px">
-        <button id="presetSave">사전설정 저장</button>
-        <button id="presetLoad">불러오기</button>
-        <button id="presetClear" style="background: #b02a37">
-          사전설정 삭제
-        </button>
+      <div
+        class="bar"
+        style="margin-top: 8px; gap: 8px; align-items: center; flex-wrap: wrap"
+      >
+        <!-- 🔧 여기 URL만 바꿔주면 됩니다 -->
+        <span class="small muted">서버 프리셋:</span>
+        <select id="oilType">
+          <option value="lube">급유</option>
+          <option value="dry">무급유</option>
+        </select>
+        <button id="btnFetchServer">서버 프리셋 불러오기 → textarea</button>
+        <span class="small">* 불러온 후 “비교”를 누르면 바로 반영됩니다.</span>
       </div>
 
       <textarea
         id="presetArea"
         placeholder="예)
-ALT Assembly	4		OR	Y
-CAS Assembly	1	OK	OR	N"
+ALT Assembly	4		OR	Y	N	Y
+CAS Assembly	1	OK	OR	N	N	Y"
       ></textarea>
     </details>
 
@@ -274,6 +278,7 @@ CAS Assembly	1	OK	OR	N"
       <label class="small"
         ><input type="checkbox" id="resetAlsoPreset" /> 사전설정도 삭제</label
       >
+
       <label style="margin-left: auto"
         ><input type="checkbox" id="showFailedCond" /> 조건 불일치도 표시</label
       >
@@ -294,6 +299,13 @@ CAS Assembly	1	OK	OR	N"
   </div>
 
   <script>
+    /* =========================
+       서버 프리셋 주소 (여기만 바꾸면 됨)
+       - GitHub Pages(같은 리포/디렉토리): "./presets.json"
+       - Raw GitHub: "https://raw.githubusercontent.com/<user>/<repo>/<branch>/presets.json"
+    ========================== */
+    const REMOTE_PRESET_URL = "./presets.json";
+
     /* ===== Draft autosave keys ===== */
     const DRAFT_KEYS = {
       base: "draft_base_v1",
@@ -304,14 +316,13 @@ CAS Assembly	1	OK	OR	N"
     /* ===== 저장 키 ===== */
     const CHECK_STORE_KEY = "compare_check_map_v2";
     const PERCOND_STORE_KEY = "compare_perrow_byIndex_v3";
-    const PRESET_STORE_KEY = "compare_desc_presets_v1";
+    const PRESET_STORE_KEY = "compare_desc_presets_v1"; // (로컬 캐시용)
 
-    /* 전역 옵션 숨김 스위치 (필요 없으면 false) */
+    /* 전역 옵션 숨김 스위치 */
     const DISABLE_GLOBALS = true;
 
     /* ===== 유틸 ===== */
     const esc = (s) => String(s ?? "");
-
     function detectSepSmart(text) {
       if (text.includes("\t")) return "\t";
       const f = text.replace(/\r/g, "").trim().split("\n")[0] || "";
@@ -341,7 +352,7 @@ CAS Assembly	1	OK	OR	N"
     function normalizeHeader(h) {
       return String(h || "")
         .toUpperCase()
-        .replace(/[.\s/_()\-]/g, "");
+        .replace(/[.\s/_()\-\u200b]/g, "");
     }
     function parseLooseRow(line) {
       const m = line.trim().match(/^(\S+)\s+(\S+)\s*(.*)$/);
@@ -371,17 +382,15 @@ CAS Assembly	1	OK	OR	N"
     ) {
       if (!text || !text.trim()) return [];
       const lines = text.replace(/\r/g, "").trim().split("\n");
-
-      // --- 헤더 자동 탐지 (제목/머지셀 1행 등 건너뛰기) ---
       function detectHeader(lines) {
-        const CANDS = ["\t", ";", ",", null]; // null => 공백 분리
+        const CANDS = ["\t", ";", ",", null];
         const HEADS = new Set(
           [
             "품번",
             "PART",
             "P/N",
             "PN",
-            "PART NO" /* ← 추가: Part No도 헤더 후보로 인정 */,
+            "PART NO",
             "수량",
             "QTY",
             "QUANTITY",
@@ -410,20 +419,15 @@ CAS Assembly	1	OK	OR	N"
         }
         return best;
       }
-
       let { idx: headIdx, sep } = detectHeader(lines);
       if (headIdx < 0) {
-        // 최후의 수단: 기존 로직
         sep = detectSepSmart(text);
         headIdx = 0;
       }
-
-      // 헤더 행 생성 (한 칸 공백도 허용)
       const headRaw = sep
         ? lines[headIdx].split(sep).map((h) => h.trim())
         : lines[headIdx].trim().split(/\s+/);
       const headNorm = headRaw.map(normalizeHeader);
-
       const findByLabel = (...labels) => {
         const t = labels.map(normalizeHeader);
         for (let i = 0; i < headNorm.length; i++)
@@ -437,8 +441,6 @@ CAS Assembly	1	OK	OR	N"
           if (headNorm[i] === t) return i;
         return -1;
       };
-
-      /* ← 변경: Part No도 part 컬럼으로 인정 */
       const idxPart = findByLabel("품번", "PART", "P/N", "PN", "PART NO");
       const idxQty = findByLabel("수량", "QTY", "QUANTITY");
       const idxDesc = findByLabel("디스크립션", "DESCRIPTION", "DESC");
@@ -491,7 +493,7 @@ CAS Assembly	1	OK	OR	N"
       }
     }
 
-    /* ===== 기준 중복 통합(전역 옵션) ===== */
+    /* ===== 기준 중복 통합 ===== */
     function mergeBaseByPart(baseItems) {
       const map = new Map();
       for (const it of baseItems) {
@@ -573,7 +575,7 @@ CAS Assembly	1	OK	OR	N"
 
     let perCondMap = loadJson(PERCOND_STORE_KEY, "{}");
     let checkMap = loadJson(CHECK_STORE_KEY, "{}");
-    let descPresets = loadJson(PRESET_STORE_KEY, "{}");
+    let descPresets = loadJson(PRESET_STORE_KEY, "{}"); // 현재 textarea → parse → 여기에 반영해 사용
 
     /* ===== 키/조건 ===== */
     function rowKey(part, occIdx) {
@@ -599,11 +601,9 @@ CAS Assembly	1	OK	OR	N"
     /* ===== 조건 평가 ===== */
     function checkByCond(row, cfg) {
       if (!cfg || !cfg.enabled) return { ok: true, reason: "" };
-
       const wantsLvl = String(cfg.lvl || "").trim() !== "";
       const wantsIsv = String(cfg.isv || "").trim() !== "";
       if (!wantsLvl && !wantsIsv) return { ok: true, reason: "" };
-
       const rowLvl = normalizeLvl(row && row.lvl);
       const cfgLvl = normalizeLvl(cfg && cfg.lvl);
       const rowIsv = String((row && row.isv) || "")
@@ -612,7 +612,6 @@ CAS Assembly	1	OK	OR	N"
       const cfgIsv = String((cfg && cfg.isv) || "")
         .toUpperCase()
         .trim();
-
       const isHash = (v) => typeof v === "string" && v[0] === "#";
       const eqLvl = wantsLvl
         ? isHash(rowLvl) && isHash(cfgLvl)
@@ -625,12 +624,10 @@ CAS Assembly	1	OK	OR	N"
               .trim()
         : null;
       const eqIsv = wantsIsv ? rowIsv === cfgIsv : null;
-
       let ok;
       if ((cfg.mode || "OR").toUpperCase() === "AND")
         ok = (wantsLvl ? eqLvl : true) && (wantsIsv ? eqIsv : true);
       else ok = (wantsLvl ? eqLvl : false) || (wantsIsv ? eqIsv : false);
-
       let reason = "";
       if (!ok) {
         if (wantsLvl && !eqLvl) reason += `LVL≠${cfg.lvl} `;
@@ -647,18 +644,17 @@ CAS Assembly	1	OK	OR	N"
     function renderLvlSelect(cur, cls) {
       const sel = normalizeLvlDigits(cur);
       return `<select class="${cls}">
-    <option value="" ${sel === "" ? "selected" : ""}></option>
-    <option value="1" ${sel === "1" ? "selected" : ""}>1</option>
-    <option value="2" ${sel === "2" ? "selected" : ""}>2</option>
-    <option value="3" ${sel === "3" ? "selected" : ""}>3</option>
-    <option value="4" ${sel === "4" ? "selected" : ""}>4</option>
-  </select>`;
+        <option value="" ${sel === "" ? "selected" : ""}></option>
+        <option value="1" ${sel === "1" ? "selected" : ""}>1</option>
+        <option value="2" ${sel === "2" ? "selected" : ""}>2</option>
+        <option value="3" ${sel === "3" ? "selected" : ""}>3</option>
+        <option value="4" ${sel === "4" ? "selected" : ""}>4</option>
+      </select>`;
     }
-
     function fmtSign(v) {
       if (v == null || isNaN(v)) return "";
-      const numV = Number(v);
-      return Number.isInteger(numV) ? numV.toString() : numV.toFixed(2);
+      const n = Number(v);
+      return Number.isInteger(n) ? n.toString() : n.toFixed(2);
     }
 
     let lastResult = [];
@@ -673,7 +669,6 @@ CAS Assembly	1	OK	OR	N"
       let filtered = onlyUnchecked
         ? rows.filter((r) => !checkMap[r._key])
         : rows;
-
       filtered = filtered.filter((r) => {
         if (showOKOnly && !showNGOnly) return r["판정"] === "OK";
         if (showNGOnly && !showOKOnly) return r["판정"] === "NG";
@@ -797,15 +792,13 @@ CAS Assembly	1	OK	OR	N"
             const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
             html += `<td class="${cls}">${esc(text)}</td>`;
             return;
-          } else if (c === "확인") {
-            html += `<td style="text-align:center">
-          <input type="checkbox" class="rowchk" data-key="${r._key}" ${
-              checked ? "checked" : ""
-            }>
-        </td>`;
+          }
+          if (c === "확인") {
+            html += `<td style="text-align:center"><input type="checkbox" class="rowchk" data-key="${
+              r._key
+            }" ${checked ? "checked" : ""}></td>`;
             return;
           }
-
           html += `<td>${r[c] ?? ""}</td>`;
         });
         html += "</tr>";
@@ -824,7 +817,6 @@ CAS Assembly	1	OK	OR	N"
           if (cb.checked) checkMap[k] = true;
           else delete checkMap[k];
           saveJson(CHECK_STORE_KEY, checkMap);
-
           const onlyUnconfirmed =
             document.getElementById("showCheckedOnly").checked;
           if (onlyUnconfirmed) {
@@ -847,7 +839,6 @@ CAS Assembly	1	OK	OR	N"
           const md = tr.querySelector(".pc-mode");
           const aggEl = tr.querySelector(".pc-agg");
           const baseEl = tr.querySelector(".pc-base-merge");
-
           function save() {
             perCondMap[rk] = {
               enabled: !!(en && en.checked),
@@ -933,7 +924,6 @@ CAS Assembly	1	OK	OR	N"
       .addEventListener("change", () =>
         renderTable(lastResult, { enabled: false })
       );
-
     function getVisibleRows() {
       return document.getElementById("showCheckedOnly").checked
         ? lastResult.filter((r) => !checkMap[r._key])
@@ -958,6 +948,14 @@ CAS Assembly	1	OK	OR	N"
 
     function runCompare() {
       try {
+        // textarea → descPresets 즉시 반영
+        const pa = document.getElementById("presetArea");
+        if (pa) {
+          descPresets = parsePresetText(
+            pa.value || ""
+          ); /* saveJson(PRESET_STORE_KEY,descPresets); */
+        }
+
         const useDesc = document.getElementById("useDesc").checked;
         const mergeDup = document.getElementById("mergeBaseDup").checked;
         const showFail = (document.getElementById(
@@ -1013,7 +1011,6 @@ CAS Assembly	1	OK	OR	N"
           if (typeof scheduleSave === "function") scheduleSave();
           renderTable(lastResult, { enabled: false });
         }
-
         document
           .getElementById("filterOk")
           ?.addEventListener("change", onJudgeFilterChange);
@@ -1110,7 +1107,6 @@ CAS Assembly	1	OK	OR	N"
             }
             return null;
           }
-
           for (const br of baseRows) {
             const cfg = condOfRow(br);
             const part = br.part,
@@ -1237,25 +1233,32 @@ CAS Assembly	1	OK	OR	N"
       }
     }
 
-    /* ===== 사전설정 ===== */
+    /* ===== 사전설정 파서 (탭/공백/;/, 지원) ===== */
     function parsePresetText(txt) {
-      const lines = txt
+      const lines = (txt || "")
         .replace(/\r/g, "")
-        .trim()
         .split("\n")
-        .filter((x) => x.trim() !== "");
+        .map((s) => s.trimEnd())
+        .filter((s) => s.trim() !== "");
+      const smartSplit = (line) => {
+        if (line.includes("\t")) return line.split("\t").map((s) => s.trim());
+        if (line.includes(";")) return line.split(";").map((s) => s.trim());
+        if (line.includes(",")) return line.split(",").map((s) => s.trim());
+        return line.split(/\s{2,}/).map((s) => s.trim());
+      };
       const map = {};
       for (const line of lines) {
-        const cols = line.split("\t");
+        const cols = smartSplit(line);
         const desc = (cols[0] || "").trim();
         if (!desc) continue;
         const lvl = (cols[1] || "").trim();
         const isv = (cols[2] || "").trim();
         const mode =
           (cols[3] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
-        const agg = /^(Y|YES|TRUE|1)$/i.test((cols[4] || "").trim());
-        const base = /^(Y|YES|TRUE|1)$/i.test((cols[5] || "").trim());
-        const en = /^(Y|YES|TRUE|1)$/i.test((cols[6] || "").trim());
+        const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
+        const agg = yn(cols[4]);
+        const base = yn(cols[5]);
+        const en = yn(cols[6]);
         map[keyDesc(desc)] = {
           lvl,
           isv,
@@ -1267,43 +1270,63 @@ CAS Assembly	1	OK	OR	N"
       }
       return map;
     }
-    document.getElementById("presetSave").addEventListener("click", () => {
-      const txt = document.getElementById("presetArea").value || "";
-      descPresets = parsePresetText(txt);
-      saveJson(PRESET_STORE_KEY, descPresets);
-      alert("사전설정을 저장했습니다.");
-    });
-    document.getElementById("presetLoad").addEventListener("click", () => {
-      descPresets = loadJson(PRESET_STORE_KEY, "{}");
-      const rows = Object.entries(descPresets).map(([k, v]) =>
-        [
-          k,
-          v.lvl || "",
-          v.isv || "",
-          v.mode || "OR",
-          v.aggregate ? "Y" : "N",
-          v.baseMerge ? "Y" : "N",
-          v.enabled ? "Y" : "N",
-        ].join("\t")
-      );
-      document.getElementById("presetArea").value = rows.length
-        ? rows.join("\n")
-        : "";
-      alert("저장된 사전설정을 불러왔습니다.");
-    });
-    document.getElementById("presetClear").addEventListener("click", () => {
-      localStorage.removeItem(PRESET_STORE_KEY);
-      descPresets = {};
-      document.getElementById("presetArea").value = "";
-      alert("사전설정을 삭제했습니다.");
-    });
+
+    /* ===== 서버 프리셋 fetch → textarea 넣기 ===== */
+    let _serverPresetCache = null;
+    async function fetchRemotePresets() {
+      // 캐시 있으면 바로
+      if (_serverPresetCache) return _serverPresetCache;
+      const res = await fetch(REMOTE_PRESET_URL, { cache: "no-cache" });
+      if (!res.ok)
+        throw new Error("서버 프리셋을 불러오지 못했습니다: " + res.status);
+      const json = await res.json();
+      _serverPresetCache = json;
+      return json;
+    }
+    function itemsToTSV(items) {
+      // JSON 항목을 TAB 구분 라인으로 변환(7열 보장)
+      const yn = (b) => (b ? "Y" : "N");
+      return (items || [])
+        .map((it) =>
+          [
+            it.desc ?? "",
+            it.lvl ?? "",
+            it.isv ?? "",
+            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
+            yn(!!it.aggregate),
+            yn(!!it.baseMerge),
+            yn(!!it.enabled),
+          ].join("\t")
+        )
+        .join("\n");
+    }
+    async function applyServerPresetToTextarea() {
+      try {
+        const type = document.getElementById("oilType").value; // "lube"|"dry"
+        const data = await fetchRemotePresets(); // {version, types:{lube:{label,items:[]}, dry:{...}}}
+        const items = data?.types?.[type]?.items || [];
+        const tsv = itemsToTSV(items);
+        const ta = document.getElementById("presetArea");
+        ta.value = tsv ? tsv + "\n" : "";
+        // 필요시 즉시 내부 descPresets로 반영하고 싶으면 아래 2줄 주석 해제
+        // descPresets=parsePresetText(ta.value||"");
+        // saveJson(PRESET_STORE_KEY, descPresets);
+        alert("서버 프리셋을 불러왔습니다.");
+      } catch (e) {
+        alert(
+          "프리셋 불러오기 실패: " + (e && e.message ? e.message : String(e))
+        );
+      }
+    }
+    document
+      .getElementById("btnFetchServer")
+      .addEventListener("click", applyServerPresetToTextarea);
 
     /* ===== 초기화 ===== */
     document.getElementById("resetAll").addEventListener("click", () => {
       try {
         localStorage.removeItem(PERCOND_STORE_KEY);
         localStorage.removeItem(CHECK_STORE_KEY);
-
         if (document.getElementById("resetAlsoPreset").checked) {
           localStorage.removeItem(PRESET_STORE_KEY);
           descPresets = {};
@@ -1314,15 +1337,12 @@ CAS Assembly	1	OK	OR	N"
         }
         perCondMap = {};
         checkMap = {};
-
         document
           .querySelectorAll("#out .rowchk")
           .forEach((cb) => (cb.checked = false));
-
         renderTable(Array.isArray(lastResult) ? lastResult : [], {
           enabled: false,
         });
-
         alert("저장된 설정을 삭제했습니다.");
       } catch (err) {
         alert(
@@ -1369,7 +1389,6 @@ CAS Assembly	1	OK	OR	N"
         const s = localStorage.getItem(DRAFT_KEYS.subm);
         if (b !== null) document.getElementById("base").value = b;
         if (s !== null) document.getElementById("subm").value = s;
-
         const raw = localStorage.getItem(DRAFT_KEYS.opts);
         if (raw) {
           const o = JSON.parse(raw);
@@ -1438,7 +1457,7 @@ CAS Assembly	1	OK	OR	N"
     });
     loadDraft();
 
-    /* === [교체 완료] 제출 헤더 정리: 5열 고정 추출 === */
+    /* === 제출 헤더 정리: 5열 고정 추출 === */
     function normalizeTextareaToNeededColumns(textareaId) {
       const ta = document.getElementById(textareaId);
       if (!ta) return;
@@ -1447,7 +1466,6 @@ CAS Assembly	1	OK	OR	N"
         alert("정리할 데이터가 없습니다.");
         return;
       }
-
       const lines = raw
         .replace(/\r/g, "")
         .split("\n")
@@ -1456,49 +1474,21 @@ CAS Assembly	1	OK	OR	N"
         alert("해석 가능한 행이 없습니다.");
         return;
       }
-      // (1) 헤더 줄 찾기: 첫 번째 비어있지 않은 줄
       const headIdx = lines.findIndex((x) => /\S/.test(x));
       const headerLine = lines[headIdx];
-
-      // (2) 구분자 고정 규칙: 탭 > 세미콜론 > 콤마 > (최후) 공백
       let sep = "\t";
       if (headerLine.includes("\t")) sep = "\t";
       else if (headerLine.includes(";")) sep = ";";
       else if (headerLine.includes(",")) sep = ",";
-      else sep = null; // 정말로 구분자가 없을 때만 공백 분리
-
-      // (3) 분할 함수 (선택된 sep만 사용)
+      else sep = null;
       const splitWithSep = (s) =>
         sep ? s.split(sep).map((x) => x.trim()) : s.trim().split(/\s+/);
-
-      // (4) 헤더 정규화 함수와 키
       const normalizeHeaderLoose = (h) =>
         String(h || "")
           .toUpperCase()
-          .replace(/[.\s/_()\-]/g, "");
-
-      const HEAD_KEYS = [
-        "PARTNO",
-        "PART",
-        "P/N",
-        "PN",
-        "PARTNUMBER",
-        "품번",
-        "QTY",
-        "QUANTITY",
-        "수량",
-        "DESCRIPTION",
-        "DESC",
-        "디스크립션",
-        "LVL",
-        "IS",
-        "I.S",
-      ];
-
-      // (5) 헤더 셀/정규화본
+          .replace(/[.\s/_()\-\u200b]/g, "");
       const headCells = splitWithSep(lines[headIdx]);
       const headNorms = headCells.map(normalizeHeaderLoose);
-
       const findIndex = (targets) => {
         for (let i = 0; i < headNorms.length; i++) {
           const h = headNorms[i];
@@ -1508,7 +1498,6 @@ CAS Assembly	1	OK	OR	N"
         }
         return -1;
       };
-
       const idxPart = findIndex([
         "PARTNO",
         "P/N",
@@ -1521,14 +1510,12 @@ CAS Assembly	1	OK	OR	N"
       const idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
       const idxLvl = findIndex(["LVL"]);
       const idxIS = findIndex(["IS", "I.S"]);
-
       if (idxPart < 0 || idxQty < 0) {
         alert(
           "필수 헤더(Part No, Qty)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
         );
         return;
       }
-
       const outHeader = ["Part No", "Qty", "Description", "Lvl", "I.S"].join(
         "\t"
       );
@@ -1542,12 +1529,10 @@ CAS Assembly	1	OK	OR	N"
         const qty = String(get(idxQty)).trim();
         const desc = String(get(idxDesc) || "").trim();
         let lvl = String(get(idxLvl) || "").trim();
-        // 숫자형 0.1, 0.2 → 들여쓰기 표기로 변환
         if (/^0\.\d+$/.test(lvl)) {
           const depth = parseInt(lvl.split(".")[1], 10);
           lvl = ".".repeat(depth) + depth;
         }
-
         const isv = String(get(idxIS) || "").trim();
         if (!part && !qty) continue;
         body.push([part, qty, desc, lvl, isv].join("\t"));
@@ -1556,7 +1541,6 @@ CAS Assembly	1	OK	OR	N"
         alert("본문 데이터가 없습니다.");
         return;
       }
-
       ta.value = outHeader + "\n" + body.join("\n");
       if (typeof scheduleSave === "function") scheduleSave();
       ta.focus();
@@ -1566,16 +1550,13 @@ CAS Assembly	1	OK	OR	N"
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".clear-btn");
       if (!btn) return;
-
-      const id = btn.getAttribute("data-target"); // "base" | "subm"
-      const act = btn.dataset.action; // undefined | "normalize"
-
+      const id = btn.getAttribute("data-target");
+      const act = btn.dataset.action;
       if (act === "normalize") {
         if (id !== "subm") return;
         normalizeTextareaToNeededColumns(id);
         return;
       }
-
       const ta = document.getElementById(id);
       if (!ta) return;
       ta.value = "";
