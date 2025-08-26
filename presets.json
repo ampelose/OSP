@@ -7,84 +7,84 @@
       "items": [
         {
           "desc": "명판 조립용 SCREW",
-          "lvl": "1",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "1",
+          "isv": ""
         },
         {
           "desc": "가스켓-증발기",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "가스켓-응축기",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 볼트",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 너트",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 플레인 와셔",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 U 패킹 (증발기)",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "워터박스 U 패킹 (응축기)",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "AS-GEAR BOX-SUPPORT",
-          "lvl": "3",
-          "isv": "70",
-          "mode": "AND",
-          "aggregate": false,
           "baseMerge": true,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "AND",
+          "lvl": "3",
+          "isv": "70"
         }
       ]
     },
@@ -93,111 +93,111 @@
       "items": [
         {
           "desc": "명판 조립용 SCREW",
-          "lvl": "1",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "1",
+          "isv": ""
         },
         {
           "desc": "가스켓-증발기",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "가스켓-응축기",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 볼트",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 너트",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 조립용 플레인 와셔",
-          "lvl": "4",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "4",
+          "isv": ""
         },
         {
           "desc": "워터박스 U 패킹 (증발기)",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "워터박스 U 패킹 (응축기)",
-          "lvl": "2",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": true,
           "baseMerge": false,
-          "enabled": true
+          "aggregate": true,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "2",
+          "isv": ""
         },
         {
           "desc": "AS-ECO-SUPPORT-ATTA-TB",
-          "lvl": "",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": true,
-          "enabled": false
+          "aggregate": false,
+          "enabled": false,
+          "mode": "OR",
+          "lvl": "",
+          "isv": ""
         },
         {
           "desc": "SUPPORTER PLATE",
-          "lvl": "3",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": true,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": ""
         },
         {
           "desc": "ANGLE-PLATE",
-          "lvl": "3",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": true,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": ""
         },
         {
           "desc": "ANGLE-PLATE",
-          "lvl": "3",
-          "isv": "",
-          "mode": "OR",
-          "aggregate": false,
           "baseMerge": true,
-          "enabled": true
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": ""
         }
       ]
     }
