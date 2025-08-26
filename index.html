@@ -95,14 +95,10 @@
     tr.rowhl {
       background: #fff3bf !important;
     }
-    .ta-wrap {
-      position: relative;
-    }
+
+    /* (교체) 버튼 공통 */
     .clear-btn {
-      position: absolute;
-      right: 8px;
-      bottom: 8px;
-      padding: 4px 8px;
+      padding: 6px 10px;
       font-size: 12px;
       line-height: 1;
       border: 1px solid #ccc;
@@ -114,6 +110,24 @@
     .clear-btn:hover {
       background: #f0f0f0;
     }
+
+    /* (신규) 텍스트영역 아래 버튼 박스 */
+    .ta-footer {
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between; /* 좌측엔 설명글, 우측엔 버튼 */
+      align-items: center;
+      flex-wrap: wrap; /* 화면 좁을 때 줄바꿈 허용 */
+    }
+
+    .ta-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
   </style>
 
   <h1>BOM Checker</h1>
@@ -123,56 +137,69 @@
   </div>
 
   <div class="grid">
+    <!-- 좌측: 기준 목록 -->
     <div class="box">
-      <b>① 기준 목록</b>
+      <b>▶ 주요 부품 리스트</b>
       <div class="ta-wrap">
         <textarea
           id="base"
           placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
         ></textarea>
-        <button
-          type="button"
-          class="clear-btn"
-          data-target="base"
-          aria-label="기준 목록 지우기"
-        >
-          지우기
-        </button>
       </div>
-      <div class="small">
-        기준에서 품번이 <code>0</code>, <code>-</code>, <code>N/A</code> 인 행은
-        자동 제외됩니다.
+      <div class="ta-footer">
+        <div class="small">
+          기준에서 품번이 <code>0</code>, <code>-</code>, <code>N/A</code> 인
+          행은 자동 제외됩니다.
+        </div>
+        <div class="ta-actions">
+          <button
+            type="button"
+            class="clear-btn"
+            data-target="base"
+            aria-label="기준 목록 지우기"
+          >
+            지우기
+          </button>
+        </div>
       </div>
     </div>
 
+    <!-- 우측: 제출 목록 -->
     <div class="box">
-      <b>② 제출 목록</b>
+      <b>▶ 모델 서픽스 BOM</b>
       <div class="ta-wrap">
         <textarea
           id="subm"
           placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
         ></textarea>
-        <button
-          type="button"
-          class="clear-btn"
-          data-target="subm"
-          data-action="normalize"
-          aria-label="제출 목록 헤더 정리"
-          style="right: 78px"
-        >
-          헤더 정리
-        </button>
-        <button
-          type="button"
-          class="clear-btn"
-          data-target="subm"
-          aria-label="제출 목록 지우기"
-        >
-          지우기
-        </button>
+      </div>
+      <div class="ta-footer">
+        <div class="small">
+          <!-- 필요 시 설명 추가 -->
+        </div>
+        <div class="ta-actions">
+          <button
+            type="button"
+            class="clear-btn"
+            data-target="subm"
+            data-action="normalize"
+            aria-label="제출 목록 헤더 정리"
+          >
+            헤더 정리
+          </button>
+          <button
+            type="button"
+            class="clear-btn"
+            data-target="subm"
+            aria-label="제출 목록 지우기"
+          >
+            지우기
+          </button>
+        </div>
       </div>
     </div>
   </div>
+  <!-- grid 끝 -->
 
   <div class="box" style="margin-top: 12px">
     <div class="bar" style="margin-bottom: 6px">
@@ -237,11 +264,10 @@
         <span class="small"
           >· 형식:
           <code
-            >Description / Lvl / I.S / 모드(OR/AND) / 품번합산(Y/N) /
-            기준합산(Y/N) / 조건사용(Y/N)</code
+            >Description / 기준합산(Y/N) / 품번합산(Y/N) / 조건사용(Y/N) /
+            모드(OR/AND) / Lvl / I.S — TAB 구분</code
           >
-          — TAB 구분</span
-        >
+        </span>
         <span class="small" style="margin-left: auto">눌러서 접기/펼치기</span>
       </summary>
 
@@ -250,20 +276,19 @@
         style="margin-top: 8px; gap: 8px; align-items: center; flex-wrap: wrap"
       >
         <!-- 🔧 여기 URL만 바꿔주면 됩니다 -->
-        <span class="small muted">서버 프리셋:</span>
+        <span class="small muted">제품타입 : </span>
         <select id="oilType">
           <option value="lube">급유</option>
           <option value="dry">무급유</option>
         </select>
-        <button id="btnFetchServer">서버 프리셋 불러오기 → textarea</button>
+        <button id="btnFetchServer">프리셋 불러오기</button>
         <span class="small">* 불러온 후 “비교”를 누르면 바로 반영됩니다.</span>
       </div>
 
       <textarea
         id="presetArea"
-        placeholder="예)
-ALT Assembly	4		OR	Y	N	Y
-CAS Assembly	1	OK	OR	N	N	Y"
+        placeholder="ALT Assembly	N	Y	Y	OR	4	
+CAS Assembly	N	N	Y	OR	1	70"
       ></textarea>
     </details>
 
@@ -1240,32 +1265,38 @@ CAS Assembly	1	OK	OR	N	N	Y"
         .split("\n")
         .map((s) => s.trimEnd())
         .filter((s) => s.trim() !== "");
+
       const smartSplit = (line) => {
         if (line.includes("\t")) return line.split("\t").map((s) => s.trim());
         if (line.includes(";")) return line.split(";").map((s) => s.trim());
         if (line.includes(",")) return line.split(",").map((s) => s.trim());
         return line.split(/\s{2,}/).map((s) => s.trim());
       };
+
+      const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
+
       const map = {};
       for (const line of lines) {
         const cols = smartSplit(line);
         const desc = (cols[0] || "").trim();
         if (!desc) continue;
-        const lvl = (cols[1] || "").trim();
-        const isv = (cols[2] || "").trim();
+
+        // 새 순서: desc, baseMerge, aggregate, enabled, mode, lvl, isv
+        const base = yn(cols[1]);
+        const agg = yn(cols[2]);
+        const en = yn(cols[3]);
         const mode =
-          (cols[3] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
-        const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
-        const agg = yn(cols[4]);
-        const base = yn(cols[5]);
-        const en = yn(cols[6]);
+          (cols[4] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
+        const lvl = (cols[5] || "").trim();
+        const isv = (cols[6] || "").trim();
+
         map[keyDesc(desc)] = {
+          baseMerge: base,
+          aggregate: agg,
+          enabled: en,
+          mode,
           lvl,
           isv,
-          mode,
-          aggregate: agg,
-          baseMerge: base,
-          enabled: en,
         };
       }
       return map;
