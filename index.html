@@ -147,10 +147,7 @@
         ></textarea>
       </div>
       <div class="ta-footer">
-        <div class="small">
-          기준에서 품번이 <code>0</code>, <code>-</code>, <code>N/A</code> 인
-          행은 자동 제외됩니다.
-        </div>
+        <div class="small"></div>
         <div class="ta-actions">
           <button
             type="button"
@@ -345,6 +342,40 @@ CAS Assembly	N	N	Y	OR	1	70"
 
     /* 전역 옵션 숨김 스위치 */
     const DISABLE_GLOBALS = true;
+
+    /* === 항상 초기화로 시작 ===
+     - 매 로드마다 붙여넣기/옵션/체크 상태를 싹 비움
+     - 프리셋(JSON 서버에서 불러오는 값)은 건드리지 않음
+     - 테스트 때 기존 기록을 유지하고 싶으면 URL에 ?keep=1 붙여서 접속
+   */
+    (function alwaysFreshStart() {
+      try {
+        const keep = new URLSearchParams(location.search).has("keep");
+        if (keep) return;
+
+        // 1) 드래프트(붙여넣기/옵션 스냅샷) 제거
+        localStorage.removeItem(DRAFT_KEYS.base);
+        localStorage.removeItem(DRAFT_KEYS.subm);
+        localStorage.removeItem(DRAFT_KEYS.opts);
+
+        // 2) 행 체크/개별 조건 맵 제거
+        localStorage.removeItem(CHECK_STORE_KEY);
+        localStorage.removeItem(PERCOND_STORE_KEY);
+
+        // 3) 화면 쪽도 안전하게 초기화
+        const $base = document.getElementById("base");
+        const $subm = document.getElementById("subm");
+        if ($base) $base.value = "";
+        if ($subm) $subm.value = "";
+        const $out = document.getElementById("out");
+        if ($out) {
+          $out.innerHTML = "";
+          $out.style.display = "none";
+        }
+      } catch (e) {
+        // 초기화 실패해도 작업은 진행되도록 조용히 무시
+      }
+    })();
 
     /* ===== 유틸 ===== */
     const esc = (s) => String(s ?? "");
@@ -1324,7 +1355,7 @@ CAS Assembly	N	N	Y	OR	1	70"
             yn(!!it.baseMerge),
             yn(!!it.aggregate),
             yn(!!it.enabled),
-            (String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR"),
+            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
             it.lvl ?? "",
             it.isv ?? "",
           ].join("\t")
@@ -1414,6 +1445,7 @@ CAS Assembly	N	N	Y	OR	1	70"
         localStorage.setItem(DRAFT_KEYS.opts, JSON.stringify(snapshot));
       } catch (e) {}
     }
+
     function loadDraft() {
       try {
         const b = localStorage.getItem(DRAFT_KEYS.base);
@@ -1486,6 +1518,7 @@ CAS Assembly	N	N	Y	OR	1	70"
         el.tagName === "SELECT" || el.type === "checkbox" ? "change" : "input";
       el.addEventListener(evt, scheduleSave);
     });
+
     loadDraft();
 
     /* === 제출 헤더 정리: 5열 고정 추출 === */
@@ -1675,4 +1708,3 @@ CAS Assembly	N	N	Y	OR	1	70"
     }
   </script>
 </html>
-
