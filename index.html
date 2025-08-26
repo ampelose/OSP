@@ -2,7 +2,7 @@
 <html lang="ko">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BOM Checker</title>
+  <title>BOM CHECK</title>
 
   <style>
     body {
@@ -130,9 +130,9 @@
     }
   </style>
 
-  <h1>BOM Checker</h1>
+  <h1>BOM CHECK</h1>
   <div class="small">
-    필수 헤더: <b>P/N</b>, <b>QTY</b> · 선택: <b>Description</b>, <b>Lvl</b>,
+    필수 헤더: <b>P/N</b>, <b>QTY</b>, <b>Description</b> · 선택: <b>Lvl</b>,
     <b>I.S</b>
   </div>
 
@@ -1321,12 +1321,12 @@ CAS Assembly	N	N	Y	OR	1	70"
         .map((it) =>
           [
             it.desc ?? "",
+            yn(!!it.baseMerge),
+            yn(!!it.aggregate),
+            yn(!!it.enabled),
+            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
             it.lvl ?? "",
             it.isv ?? "",
-            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
-            yn(!!it.aggregate),
-            yn(!!it.baseMerge),
-            yn(!!it.enabled),
           ].join("\t")
         )
         .join("\n");
@@ -1543,7 +1543,7 @@ CAS Assembly	N	N	Y	OR	1	70"
       const idxIS = findIndex(["IS", "I.S"]);
       if (idxPart < 0 || idxQty < 0) {
         alert(
-          "필수 헤더(Part No, Qty)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
+          "필수 헤더(Part No, Qty, Description)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
         );
         return;
       }
