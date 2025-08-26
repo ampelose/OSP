@@ -15,7 +15,7 @@
           "enabled": true
         },
         {
-          "desc": "가스켓 조립볼트",
+          "desc": "가스켓-증발기",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -24,7 +24,7 @@
           "enabled": true
         },
         {
-          "desc": "가스켓(응축기)",
+          "desc": "가스켓-응축기",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -51,7 +51,7 @@
           "enabled": true
         },
         {
-          "desc": "워터박스 조립용 플레이트 와셔",
+          "desc": "워터박스 조립용 플레인 와셔",
           "lvl": "4",
           "isv": "",
           "mode": "OR",
@@ -60,7 +60,7 @@
           "enabled": true
         },
         {
-          "desc": "워터박스 패킹 (증발기)",
+          "desc": "워터박스 U 패킹 (증발기)",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -69,12 +69,21 @@
           "enabled": true
         },
         {
-          "desc": "워터박스 패킹 (응축기)",
+          "desc": "워터박스 U 패킹 (응축기)",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
           "aggregate": true,
           "baseMerge": false,
+          "enabled": true
+        },
+        {
+          "desc": "AS-GEAR BOX-SUPPORT",
+          "lvl": "3",
+          "isv": "70",
+          "mode": "OR",
+          "aggregate": false,
+          "baseMerge": true,
           "enabled": true
         }
       ]
@@ -92,7 +101,7 @@
           "enabled": true
         },
         {
-          "desc": "가스켓 조립볼트",
+          "desc": "가스켓-증발기",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -101,7 +110,7 @@
           "enabled": false
         },
         {
-          "desc": "가스켓(응축기)",
+          "desc": "가스켓-응축기",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -128,7 +137,7 @@
           "enabled": false
         },
         {
-          "desc": "워터박스 조립용 플레이트 와셔",
+          "desc": "워터박스 조립용 플레인 와셔",
           "lvl": "4",
           "isv": "",
           "mode": "OR",
@@ -137,7 +146,7 @@
           "enabled": false
         },
         {
-          "desc": "워터박스 패킹 (증발기)",
+          "desc": "워터박스 U 패킹 (증발기)",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
@@ -146,7 +155,7 @@
           "enabled": false
         },
         {
-          "desc": "워터박스 패킹 (응축기)",
+          "desc": "워터박스 U 패킹 (응축기)",
           "lvl": "2",
           "isv": "",
           "mode": "OR",
