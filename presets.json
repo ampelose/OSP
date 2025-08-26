@@ -81,7 +81,7 @@
           "desc": "AS-GEAR BOX-SUPPORT",
           "lvl": "3",
           "isv": "70",
-          "mode": "OR",
+          "mode": "AND",
           "aggregate": false,
           "baseMerge": true,
           "enabled": true
