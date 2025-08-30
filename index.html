@@ -280,7 +280,8 @@
       </div>
 
       <textarea
-        id="presetArea" readonly
+        id="presetArea"
+        readonly
         placeholder="ALT Assembly	N	Y	Y	OR	4	
 CAS Assembly	N	N	Y	OR	1	70"
       ></textarea>
@@ -751,6 +752,8 @@ CAS Assembly	N	N	Y	OR	1	70"
       for (const c of cols) html += `<th>${c}</th>`;
       html += "</tr></thead><tbody>";
 
+      const align = (col) =>
+        col === "디스크립션" || col === "조건" ? "left" : "center";
       filtered.forEach((r, i) => {
         const checked = !!checkMap[r._key];
         const rk = r._rk;
@@ -779,21 +782,25 @@ CAS Assembly	N	N	Y	OR	1	70"
         )}">`;
         cols.forEach((c) => {
           if (c === "No.") {
-            html += `<td>${i + 1}</td>`;
+            html += `<td style="text-align:${align(c)}">${i + 1}</td>`;
             return;
           }
           if (["기준수량", "제출수량"].includes(c)) {
-            html += `<td>${r[c]}</td>`;
+            html += `<td style="text-align:${align(c)}">${r[c]}</td>`;
             return;
           }
           if (c === "차이") {
             const v = Number(r[c]) || 0;
             const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
-            html += `<td class="${cls}">${fmtSign(v)}</td>`;
+            html += `<td class="${cls}" style="text-align:${align(
+              c
+            )}">${fmtSign(v)}</td>`;
             return;
           }
           if (c === "조건") {
-            html += `<td>${r["_cond"] || ""}</td>`;
+            html += `<td style="text-align:${align(c)}">${
+              r["_cond"] || ""
+            }</td>`;
             return;
           }
           if (!agg && c === "조건사용") {
@@ -803,17 +810,20 @@ CAS Assembly	N	N	Y	OR	1	70"
             return;
           }
           if (!agg && c === "Lvl 입력값") {
-            html += `<td>${renderLvlSelect(rowCfg.lvl || "", "pc-lvl")}</td>`;
+            html += `<td style="text-align:center">${renderLvlSelect(
+              rowCfg.lvl || "",
+              "pc-lvl"
+            )}</td>`;
             return;
           }
           if (!agg && c === "I.S 입력값") {
-            html += `<td><input type="text" class="pc-is" value="${
+            html += `<td style="text-align:center"><input type="text" class="pc-is" value="${
               rowCfg.isv || ""
             }"></td>`;
             return;
           }
           if (!agg && c === "모드") {
-            html += `<td><select class="pc-mode"><option value="OR"${
+            html += `<td style="text-align:center"><select class="pc-mode"><option value="OR"${
               rowCfg.mode === "OR" ? " selected" : ""
             }>OR</option><option value="AND"${
               rowCfg.mode === "AND" ? " selected" : ""
@@ -835,7 +845,9 @@ CAS Assembly	N	N	Y	OR	1	70"
           if (c === "판정") {
             const text = String(r[c] ?? "");
             const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
-            html += `<td class="${cls}">${esc(text)}</td>`;
+            html += `<td class="${cls}" style="text-align:${align(c)}">${esc(
+              text
+            )}</td>`;
             return;
           }
           if (c === "확인") {
@@ -844,7 +856,7 @@ CAS Assembly	N	N	Y	OR	1	70"
             }" ${checked ? "checked" : ""}></td>`;
             return;
           }
-          html += `<td>${r[c] ?? ""}</td>`;
+          html += `<td style="text-align:${align(c)}">${r[c] ?? ""}</td>`;
         });
         html += "</tr>";
       });
@@ -1507,15 +1519,17 @@ CAS Assembly	N	N	Y	OR	1	70"
 
     loadDraft();
 
-    /* === 제출 헤더 정리: 5열 고정 추출 === */
+    /* === 제출 헤더 정리: 5열 고정 추출 (헤더 없으면 고정 인덱스 Fallback) === */
     function normalizeTextareaToNeededColumns(textareaId) {
       const ta = document.getElementById(textareaId);
       if (!ta) return;
+
       const raw = ta.value || "";
       if (!raw.trim()) {
         alert("정리할 데이터가 없습니다.");
         return;
       }
+
       const lines = raw
         .replace(/\r/g, "")
         .split("\n")
@@ -1524,20 +1538,24 @@ CAS Assembly	N	N	Y	OR	1	70"
         alert("해석 가능한 행이 없습니다.");
         return;
       }
-      const headIdx = lines.findIndex((x) => /\S/.test(x));
-      const headerLine = lines[headIdx];
+
+      // 구분자 추정
+      const headerLine = lines[0];
       let sep = "\t";
       if (headerLine.includes("\t")) sep = "\t";
       else if (headerLine.includes(";")) sep = ";";
       else if (headerLine.includes(",")) sep = ",";
       else sep = null;
+
       const splitWithSep = (s) =>
         sep ? s.split(sep).map((x) => x.trim()) : s.trim().split(/\s+/);
       const normalizeHeaderLoose = (h) =>
         String(h || "")
           .toUpperCase()
           .replace(/[.\s/_()\-\u200b]/g, "");
-      const headCells = splitWithSep(lines[headIdx]);
+
+      // 1) 헤더 기반 매핑 시도
+      const headCells = splitWithSep(lines[0]);
       const headNorms = headCells.map(normalizeHeaderLoose);
       const findIndex = (targets) => {
         for (let i = 0; i < headNorms.length; i++) {
@@ -1548,7 +1566,8 @@ CAS Assembly	N	N	Y	OR	1	70"
         }
         return -1;
       };
-      const idxPart = findIndex([
+
+      let idxPart = findIndex([
         "PARTNO",
         "P/N",
         "PN",
@@ -1556,44 +1575,76 @@ CAS Assembly	N	N	Y	OR	1	70"
         "PARTNUMBER",
         "품번",
       ]);
-      const idxQty = findIndex(["QTY", "QUANTITY", "수량"]);
-      const idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
-      const idxLvl = findIndex(["LVL"]);
-      const idxIS = findIndex(["IS", "I.S"]);
-      if (idxPart < 0 || idxQty < 0) {
-        alert(
-          "필수 헤더(Part No, Qty, Description)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
-        );
-        return;
+      let idxQty = findIndex(["QTY", "QUANTITY", "수량"]);
+      let idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
+      let idxLvl = findIndex(["LVL"]);
+      let idxIS = findIndex(["IS", "I.S"]);
+
+      let startRow = 1; // 헤더 다음 행부터
+
+      // 2) 헤더가 없거나 필수 인덱스를 잡지 못하면 → 고정 위치 Fallback
+      const needHeader = idxPart < 0 || idxQty < 0 || idxDesc < 0;
+      if (needHeader) {
+        // 사람이 말한 1,2,3,11,13 칸 → JS 인덱스 0,1,2,10,12
+        const FIX = { part: 0, lvl: 1, isv: 2, desc: 10, qty: 12 };
+        idxPart = FIX.part;
+        idxLvl = FIX.lvl;
+        idxIS = FIX.isv;
+        idxDesc = FIX.desc;
+        idxQty = FIX.qty;
+        startRow = 0; // 헤더가 없으니 첫 줄부터 본문
       }
+
       const outHeader = ["Part No", "Qty", "Description", "Lvl", "I.S"].join(
         "\t"
       );
       const body = [];
-      for (let r = headIdx + 1; r < lines.length; r++) {
+
+      for (let r = startRow; r < lines.length; r++) {
         const row = lines[r];
         if (!row || !row.trim()) continue;
-        const cells = splitWithSep(row, sep);
+        const cells = splitWithSep(row);
+
+        // 고정 위치일 경우 컬럼 수가 모자라면 스킵
+        const maxIdx = Math.max(idxPart, idxQty, idxDesc, idxLvl, idxIS);
+        if (maxIdx >= cells.length) continue;
+
         const get = (i) => (i >= 0 && i < cells.length ? cells[i] : "");
         const part = String(get(idxPart)).trim();
         const qty = String(get(idxQty)).trim();
         const desc = String(get(idxDesc) || "").trim();
         let lvl = String(get(idxLvl) || "").trim();
+        const isv = String(get(idxIS) || "").trim();
+
+        // Lvl 정규화(예: 0.3 → ...3 형태) — 기존 동작 유지
         if (/^0\.\d+$/.test(lvl)) {
           const depth = parseInt(lvl.split(".")[1], 10);
           lvl = ".".repeat(depth) + depth;
         }
-        const isv = String(get(idxIS) || "").trim();
+
+        // 최소 유효성(Part/QTY 둘 다 비었으면 스킵)
         if (!part && !qty) continue;
+
         body.push([part, qty, desc, lvl, isv].join("\t"));
       }
+
       if (!body.length) {
-        alert("본문 데이터가 없습니다.");
+        if (needHeader) {
+          alert(
+            "고정 인덱스(Fallback)로도 추출할 수 있는 본문이 없습니다.\n원본 데이터를 확인해주세요."
+          );
+        } else {
+          alert("본문 데이터가 없습니다.");
+        }
         return;
       }
+
       ta.value = outHeader + "\n" + body.join("\n");
       if (typeof scheduleSave === "function") scheduleSave();
       ta.focus();
+
+      // 참고: Fallback으로 정리되었다면, 생각해볼만한 팁을 알려주고 싶다면 여기서 안내문을 띄워도 됨.
+      // if (needHeader) alert("헤더가 없어 '고정 위치' 규칙으로 정리했습니다. (Part:1, Lvl:2, I.S:3, Desc:11, Qty:13)");
     }
 
     /* === 지우기/정리 통합 핸들러 === */
@@ -1694,4 +1745,3 @@ CAS Assembly	N	N	Y	OR	1	70"
     }
   </script>
 </html>
-
