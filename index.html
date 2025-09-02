@@ -921,6 +921,7 @@ CAS Assembly	N	N	Y	OR	1	70"
       const dl = document.getElementById("dl");
       dl.style.display = rows.length ? "inline-block" : "none";
       dl.onclick = () => {
+        // 열 헤더(표시 순서 유지)
         const cols = [
           "No.",
           "품번",
@@ -928,24 +929,35 @@ CAS Assembly	N	N	Y	OR	1	70"
           "기준수량",
           "제출수량",
           "차이",
-          "판정",
-          "조건",
-          "확인",
           "기준합산",
           "품번합산",
+          "조건",
+          "판정",
+          "확인",
         ];
-        const body = (
-          document.getElementById("showCheckedOnly").checked
-            ? rows.filter((r) => !checkMap[r._key])
-            : rows
-        )
+
+        // TSV 안전 인코딩 (탭/개행/따옴표 정리)
+        const tsvSafe = (v) => {
+          const s = String(v ?? "");
+          // 탭/개행/캐리지리턴 제거(엑셀에서 줄 밀림 방지)
+          return s
+            .replace(/\t/g, " ")
+            .replace(/\r?\n/g, " ")
+            .replace(/\r/g, " ");
+        };
+
+        const rowsForExport = document.getElementById("showCheckedOnly").checked
+          ? rows.filter((r) => !checkMap[r._key])
+          : rows;
+
+        const body = rowsForExport
           .map((r, i) => {
             const pKey = String(r["품번"] || "")
               .toUpperCase()
               .replace(/\s+/g, "");
             const partCfg = perCondMap[pKey] || {};
-            return [
-              i + 1,
+            const line = [
+              i + 1, // No.
               r["품번"],
               r["디스크립션"],
               r["기준수량"],
@@ -957,16 +969,23 @@ CAS Assembly	N	N	Y	OR	1	70"
               partCfg.baseMerge ? "Y" : "",
               partCfg.aggregate ? "Y" : "",
             ]
-              .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
-              .join(",");
+              .map(tsvSafe)
+              .join("\t"); // ← TSV
+            return line;
           })
-          .join("\n");
-        const csv = cols.map((s) => `"${s}"`).join(",") + "\n" + body;
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          .join("\r\n");
+
+        // BOM + CRLF 로 엑셀 호환 극대화
+        const header = cols.map(tsvSafe).join("\t");
+        const tsv = "\uFEFF" + header + "\r\n" + body; // UTF-8 BOM
+
+        const blob = new Blob([tsv], {
+          type: "text/tab-separated-values;charset=utf-8",
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "비교결과.csv";
+        a.download = "비교결과.tsv"; // 확장자 TSV 권장 (엑셀 자동 인식)
         document.body.appendChild(a);
         a.click();
         a.remove();
