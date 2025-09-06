@@ -1,1236 +1,1344 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BOM CHECK</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BOM CHECK</title>
 
-  <style>
-    body {
-      font-family: ui-sans-serif, system-ui, -apple-system;
-      max-width: 1920px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-    h1 {
-      margin: 0 0 8px;
-    }
-    .small {
-      color: #666;
-      font-size: 12px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .box {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-      font-family: ui-monospace, Consolas, monospace;
-    }
-    .bar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    button {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #111;
-      color: #fff;
-      cursor: pointer;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 12px;
-    }
-    th,
-    td {
-      border: 1px solid #e5e5e5;
-      padding: 6px 8px;
-      font-size: 14px;
-    }
-    th {
-      background: #fafafa;
-      position: sticky;
-      top: 0;
-      white-space: nowrap;
-      text-align: center;
-    }
-    .ok {
-      color: #0a7f2e;
-      font-weight: 700;
-    }
-    .pos {
-      color: #1a73e8;
-      font-weight: 700;
-    }
-    .neg {
-      color: #c62828;
-      font-weight: 700;
-    }
-    input[type="text"],
-    select {
-      padding: 4px 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      min-width: 70px;
-    }
-    .muted {
-      color: #888;
-    }
-    #presetArea {
-      height: 120px;
-      tab-size: 4;
-      -moz-tab-size: 4;
-    }
-    tr.rowhl {
-      background: #fff3bf !important;
-    }
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system;
+        max-width: 1920px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+      }
+      .small {
+        color: #666;
+        font-size: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .box {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        font-family: ui-monospace, Consolas, monospace;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #111;
+        color: #fff;
+        cursor: pointer;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        border: 1px solid #e5e5e5;
+        padding: 6px 8px;
+        font-size: 14px;
+      }
+      th {
+        background: #fafafa;
+        position: sticky;
+        top: 0;
+        white-space: nowrap;
+        text-align: center;
+      }
+      .ok {
+        color: #0a7f2e;
+        font-weight: 700;
+      }
+      .pos {
+        color: #1a73e8;
+        font-weight: 700;
+      }
+      .neg {
+        color: #c62828;
+        font-weight: 700;
+      }
+      input[type="text"],
+      select {
+        padding: 4px 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        min-width: 70px;
+      }
+      .muted {
+        color: #888;
+      }
+      #presetArea {
+        height: 120px;
+        tab-size: 4;
+        -moz-tab-size: 4;
+      }
+      tr.rowhl {
+        background: #fff3bf !important;
+      }
 
-    /* (교체) 버튼 공통 */
-    .clear-btn {
-      padding: 6px 10px;
-      font-size: 12px;
-      line-height: 1;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: #f9f9f9;
-      color: #333;
-      cursor: pointer;
-    }
-    .clear-btn:hover {
-      background: #f0f0f0;
-    }
+      .clear-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        line-height: 1;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #f9f9f9;
+        color: #333;
+        cursor: pointer;
+      }
+      .clear-btn:hover {
+        background: #f0f0f0;
+      }
 
-    /* (신규) 텍스트영역 아래 버튼 박스 */
-    .ta-footer {
-      margin-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .ta-actions {
-      margin-top: 8px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-  </style>
+      .ta-footer {
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .ta-actions {
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+    </style>
+  </head>
 
-  <h1>BOM CHECK</h1>
-  <div class="small">
-    필수 헤더: <b>P/N</b>, <b>QTY</b>, <b>Description</b> · 선택: <b>Lvl</b>,
-    <b>I.S</b>
-  </div>
+  <body>
+    <h1>BOM CHECK</h1>
+    <div class="small">
+      필수 헤더: <b>P/N</b>, <b>QTY</b>, <b>Description</b> · 선택: <b>Lvl</b>,
+      <b>I.S</b>
+    </div>
 
-  <div class="grid">
-    <!-- 좌측: 기준 목록 -->
-    <div class="box">
-      <b>▶ 주요 부품 리스트</b>
-      <div class="ta-wrap">
-        <textarea
-          id="base"
-          placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
-        ></textarea>
+    <div class="grid">
+      <div class="box">
+        <b>▶ 기준 목록 (주요 부품 리스트)</b>
+        <div class="ta-wrap">
+          <textarea
+            id="base"
+            placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
+          ></textarea>
+        </div>
+        <div class="ta-footer">
+          <div class="small"></div>
+          <div class="ta-actions">
+            <button
+              type="button"
+              class="clear-btn"
+              data-target="base"
+              aria-label="기준 목록 지우기"
+            >
+              지우기
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="ta-footer">
-        <div class="small"></div>
-        <div class="ta-actions">
-          <button
-            type="button"
-            class="clear-btn"
-            data-target="base"
-            aria-label="기준 목록 지우기"
-          >
-            지우기
-          </button>
+
+      <div class="box">
+        <b>▶ 제출 목록 (모델 서픽스 BOM)</b>
+        <div class="ta-wrap">
+          <textarea
+            id="subm"
+            placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
+          ></textarea>
+        </div>
+        <div class="ta-footer">
+          <div class="small"></div>
+          <div class="ta-actions">
+            <button
+              type="button"
+              class="clear-btn"
+              data-target="subm"
+              data-action="normalize"
+              aria-label="제출 목록 헤더 정리"
+            >
+              헤더 정리
+            </button>
+            <button
+              type="button"
+              class="clear-btn"
+              data-target="subm"
+              aria-label="제출 목록 지우기"
+            >
+              지우기
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 우측: 제출 목록 -->
-    <div class="box">
-      <b>▶ 모델 서픽스 BOM</b>
-      <div class="ta-wrap">
-        <textarea
-          id="subm"
-          placeholder="엑셀에서 헤더 포함 영역을 복사해 붙여넣기"
-        ></textarea>
+    <div class="box" style="margin-top: 12px">
+      <div class="bar" style="margin-bottom: 6px">
+        <label
+          ><input type="checkbox" id="useDesc" checked /> 품번+Description 기준
+          (불일치 시 품번으로 자동 매칭)</label
+        >
+        <label
+          ><input type="checkbox" id="mergeBaseDup" /> 기준 품번 중복 통합(수량
+          합산)</label
+        >
       </div>
-      <div class="ta-footer">
-        <div class="small"></div>
-        <div class="ta-actions">
-          <button
-            type="button"
-            class="clear-btn"
-            data-target="subm"
-            data-action="normalize"
-            aria-label="제출 목록 헤더 정리"
+
+      <div class="bar" style="gap: 12px; margin-bottom: 8px">
+        <label
+          ><input type="checkbox" id="advCondEnabled" /> 전역 추가
+          조건(Lvl/I.S)</label
+        >
+        <label>Lvl 컬럼명 <input type="text" id="lvlCol" value="Lvl" /></label>
+        <label
+          >Lvl 입력값
+          <select id="lvlVal">
+            <option value=""></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label>I.S 컬럼명 <input type="text" id="isCol" value="I.S" /></label>
+        <label
+          >I.S 입력값
+          <input type="text" id="isVal" placeholder="예: YES, OK 등"
+        /></label>
+        <label
+          >결합
+          <select id="condMode">
+            <option value="OR" selected>OR</option>
+            <option value="AND">AND</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="bar" style="gap: 12px; margin-bottom: 4px">
+        <label
+          ><input type="checkbox" id="aggMode" /> 합산 모드(품번 단위로 제출
+          합산)</label
+        >
+        <label
+          ><input type="checkbox" id="aggCondOnly" /> 조건 충족 행만 합산</label
+        >
+      </div>
+
+      <details
+        id="presetPanel"
+        class="box"
+        style="margin: 8px 0; background: #fcfcfc"
+        open
+      >
+        <summary class="bar" style="cursor: pointer">
+          <b>사전설정(Description 기준)</b>
+          <span class="small"
+            >· 형식:
+            <code
+              >Description / 기준합산(Y/N) / 품번합산(Y/N) / 조건사용(Y/N) /
+              모드(OR/AND) / Lvl / I.S — TAB 구분</code
+            >
+          </span>
+          <span class="small" style="margin-left: auto"
+            >눌러서 접기/펼치기</span
           >
-            헤더 정리
-          </button>
-          <button
-            type="button"
-            class="clear-btn"
-            data-target="subm"
-            aria-label="제출 목록 지우기"
+        </summary>
+
+        <div
+          class="bar"
+          style="
+            margin-top: 8px;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+          "
+        >
+          <span class="small muted">제품타입 : </span>
+          <select id="oilType">
+            <option value="lube">급유</option>
+            <option value="dry">무급유</option>
+          </select>
+          <button id="btnFetchServer">프리셋 불러오기</button>
+          <span class="small"
+            >* 불러온 후 “비교”를 누르면 바로 반영됩니다.</span
           >
-            지우기
-          </button>
         </div>
+
+        <textarea
+          id="presetArea"
+          readonly
+          placeholder="ALT Assembly	N	Y	Y	OR	4	
+CAS Assembly	N	N	Y	OR	1	70"
+        ></textarea>
+      </details>
+
+      <div class="bar" style="margin-top: 6px">
+        <button id="run">비교</button>
+        <button id="dl" style="display: none; background: #444">
+          CSV로 저장
+        </button>
+        <button id="resetAll" type="button" style="background: #b02a37">
+          초기화(저장값 삭제)
+        </button>
+        <label class="small"
+          ><input type="checkbox" id="resetAlsoPreset" /> 사전설정도 삭제</label
+        >
+
+        <label style="margin-left: auto"
+          ><input type="checkbox" id="showFailedCond" /> 조건 불일치도
+          표시</label
+        >
+        <label><input type="checkbox" id="filterOk" /> OK만</label>
+        <label><input type="checkbox" id="filterNg" /> NG만</label>
+        <label><input type="checkbox" id="showCheckedOnly" /> 확인 </label>
       </div>
-    </div>
-  </div>
-  <!-- grid 끝 -->
-
-  <div class="box" style="margin-top: 12px">
-    <div class="bar" style="margin-bottom: 6px">
-      <label
-        ><input type="checkbox" id="useDesc" checked /> 품번+Description 기준
-        (불일치 시 품번으로 자동 매칭)</label
-      >
-      <label
-        ><input type="checkbox" id="mergeBaseDup" /> 기준 품번 중복 통합(수량
-        합산)</label
-      >
-    </div>
-
-    <div class="bar" style="gap: 12px; margin-bottom: 8px">
-      <label
-        ><input type="checkbox" id="advCondEnabled" /> 전역 추가
-        조건(Lvl/I.S)</label
-      >
-      <label>Lvl 컬럼명 <input type="text" id="lvlCol" value="Lvl" /></label>
-      <label
-        >Lvl 입력값
-        <select id="lvlVal">
-          <option value=""></option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </label>
-      <label>I.S 컬럼명 <input type="text" id="isCol" value="I.S" /></label>
-      <label
-        >I.S 입력값 <input type="text" id="isVal" placeholder="예: YES, OK 등"
-      /></label>
-      <label
-        >결합
-        <select id="condMode">
-          <option value="OR" selected>OR</option>
-          <option value="AND">AND</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="bar" style="gap: 12px; margin-bottom: 4px">
-      <label
-        ><input type="checkbox" id="aggMode" /> 합산 모드(품번 단위로 제출
-        합산)</label
-      >
-      <label
-        ><input type="checkbox" id="aggCondOnly" /> 조건 충족 행만 합산</label
-      >
-    </div>
-
-    <!-- 사전설정(서버 프리셋) -->
-    <details
-      id="presetPanel"
-      class="box"
-      style="margin: 8px 0; background: #fcfcfc"
-      open
-    >
-      <summary class="bar" style="cursor: pointer">
-        <b>사전설정(Description 기준)</b>
-        <span class="small"
-          >· 형식:
-          <code
-            >Description / 기준합산(Y/N) / 품번합산(Y/N) / 조건사용(Y/N) /
-            모드(OR/AND) / Lvl / I.S — TAB 구분</code
-          >
-        </span>
-        <span class="small" style="margin-left: auto">눌러서 접기/펼치기</span>
-      </summary>
 
       <div
         class="bar"
-        style="margin-top: 8px; gap: 8px; align-items: center; flex-wrap: wrap"
+        style="margin-bottom: 6px; gap: 6px; justify-content: flex-end"
       >
-        <!-- 🔧 여기 URL만 바꿔주면 됩니다 -->
-        <span class="small muted">제품타입 : </span>
-        <select id="oilType">
-          <option value="lube">급유</option>
-          <option value="dry">무급유</option>
-        </select>
-        <button id="btnFetchServer">프리셋 불러오기</button>
-        <span class="small">* 불러온 후 “비교”를 누르면 바로 반영됩니다.</span>
+        <button id="checkAll" style="background: #2563eb">전체 선택</button>
+        <button id="uncheckAll" style="background: #6b7280">전체 해제</button>
       </div>
 
-      <textarea
-        id="presetArea"
-        readonly
-        placeholder="ALT Assembly	N	Y	Y	OR	4	
-CAS Assembly	N	N	Y	OR	1	70"
-      ></textarea>
-    </details>
-
-    <div class="bar" style="margin-top: 6px">
-      <button id="run">비교</button>
-      <button id="dl" style="display: none; background: #444">
-        CSV로 저장
-      </button>
-      <button id="resetAll" type="button" style="background: #b02a37">
-        초기화(저장값 삭제)
-      </button>
-      <label class="small"
-        ><input type="checkbox" id="resetAlsoPreset" /> 사전설정도 삭제</label
-      >
-
-      <label style="margin-left: auto"
-        ><input type="checkbox" id="showFailedCond" /> 조건 불일치도 표시</label
-      >
-      <label><input type="checkbox" id="filterOk" /> OK만</label>
-      <label><input type="checkbox" id="filterNg" /> NG만</label>
-      <label><input type="checkbox" id="showCheckedOnly" /> 확인 </label>
+      <div id="out" class="box" style="display: none"></div>
     </div>
 
-    <div
-      class="bar"
-      style="margin-bottom: 6px; gap: 6px; justify-content: flex-end"
-    >
-      <button id="checkAll" style="background: #2563eb">전체 선택</button>
-      <button id="uncheckAll" style="background: #6b7280">전체 해제</button>
-    </div>
+    <script>
+      const REMOTE_PRESET_URL = "./presets.json";
 
-    <div id="out" class="box" style="display: none"></div>
-  </div>
-
-  <script>
-    /* =========================
-       서버 프리셋 주소 (여기만 바꾸면 됨)
-       - GitHub Pages(같은 리포/디렉토리): "./presets.json"
-       - Raw GitHub: "https://raw.githubusercontent.com/<user>/<repo>/<branch>/presets.json"
-    ========================== */
-    const REMOTE_PRESET_URL = "./presets.json";
-
-    /* ===== Draft autosave keys ===== */
-    const DRAFT_KEYS = {
-      base: "draft_base_v1",
-      subm: "draft_subm_v1",
-      opts: "draft_opts_v1",
-    };
-
-    /* ===== 저장 키 ===== */
-    const CHECK_STORE_KEY = "compare_check_map_v2";
-    const PERCOND_STORE_KEY = "compare_perrow_byIndex_v3";
-    const PRESET_STORE_KEY = "compare_desc_presets_v1"; // (로컬 캐시용)
-
-    /* 전역 옵션 숨김 스위치 */
-    const DISABLE_GLOBALS = true;
-
-    /* === 항상 초기화로 시작 === */
-    (function alwaysFreshStart() {
-      try {
-        const keep = new URLSearchParams(location.search).has("keep");
-        if (keep) return;
-
-        localStorage.removeItem(DRAFT_KEYS.base);
-        localStorage.removeItem(DRAFT_KEYS.subm);
-        localStorage.removeItem(DRAFT_KEYS.opts);
-        localStorage.removeItem(CHECK_STORE_KEY);
-        localStorage.removeItem(PERCOND_STORE_KEY);
-
-        const $base = document.getElementById("base");
-        const $subm = document.getElementById("subm");
-        if ($base) $base.value = "";
-        if ($subm) $subm.value = "";
-        const $out = document.getElementById("out");
-        if ($out) {
-          $out.innerHTML = "";
-          $out.style.display = "none";
-        }
-      } catch (e) {
-        /* noop */
-      }
-    })();
-
-    /* ===== 유틸 ===== */
-    const esc = (s) => String(s ?? "");
-    function detectSepSmart(text) {
-      if (text.includes("\t")) return "\t";
-      const f = text.replace(/\r/g, "").trim().split("\n")[0] || "";
-      const H = ["품번", "수량", "디스크립션", "LVL", "I.S", "IS"];
-      const sc = (sep) =>
-        f
-          .split(sep)
-          .map((s) => s.trim().toUpperCase())
-          .reduce((a, c) => a + (H.includes(c) ? 1 : 0), 0);
-      if (f.includes(";") && sc(";") >= 2) return ";";
-      if (f.includes(",") && sc(",") >= 2) return ",";
-      return null;
-    }
-    function splitRow(row, sep) {
-      return sep ? row.split(sep) : row.trim().split(/\s{2,}/);
-    }
-    function cleanCell(v, mode) {
-      if (v == null) return "";
-      let s = String(v)
-        .replace(/\u00A0/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (mode === "part") return s.toUpperCase().replace(/\s+/g, "");
-      if (mode === "desc") return s.toUpperCase();
-      return s;
-    }
-    function normalizeHeader(h) {
-      return String(h || "")
-        .toUpperCase()
-        .replace(/[.\s/_()\-\u200b]/g, "");
-    }
-    function parseLooseRow(line) {
-      const m = line.trim().match(/^(\S+)\s+(\S+)\s*(.*)$/);
-      if (!m) return { part: "", qty: "", desc: "", lvl: "", isv: "" };
-      return {
-        part: cleanCell(m[1], "part"),
-        qty: cleanCell(m[2], "qty"),
-        desc: cleanCell(m[3], "desc"),
-        lvl: "",
-        isv: "",
+      const DRAFT_KEYS = {
+        base: "draft_base_v1",
+        subm: "draft_subm_v1",
+        opts: "draft_opts_v1",
       };
-    }
-    function num(x) {
-      if (x == null) return 0;
-      const s = String(x).replace(/,/g, "").replace(/\s+/g, "");
-      if (s === "" || s.toLowerCase() === "nan") return 0;
-      const v = parseFloat(s);
-      return isNaN(v) ? 0 : v;
-    }
+      const CHECK_STORE_KEY = "compare_check_map_v2";
+      const PERCOND_STORE_KEY = "compare_perrow_byIndex_v3";
+      const PRESET_STORE_KEY = "compare_desc_presets_v1";
+      const DISABLE_GLOBALS = true;
 
-    /* ===== 파서 ===== */
-    function parseTable(
-      text,
-      isBase = false,
-      lvlColName = null,
-      isColName = null
-    ) {
-      if (!text || !text.trim()) return [];
-      const lines = text.replace(/\r/g, "").trim().split("\n");
-      function detectHeader(lines) {
-        const CANDS = ["\t", ";", ",", null];
-        const HEADS = new Set(
-          [
-            "품번",
-            "PART",
-            "P/N",
-            "PN",
-            "PART NO",
-            "수량",
-            "QTY",
-            "QUANTITY",
-            "디스크립션",
-            "DESCRIPTION",
-            "DESC",
-            "LVL",
-            "I.S",
-            "IS",
-          ].map(normalizeHeader)
-        );
-        let best = { idx: -1, sep: null, score: -1 };
-        for (let i = 0; i < Math.min(lines.length, 20); i++) {
-          const raw = (lines[i] || "").trim();
-          if (!raw) continue;
-          for (const cand of CANDS) {
-            const cells = cand
-              ? raw.split(cand).map((s) => s.trim())
-              : raw.split(/\s+/);
-            const norm = cells.map(normalizeHeader);
-            let score = 0;
-            for (const h of norm) if (HEADS.has(h)) score++;
-            if (score >= 2 && score > best.score)
-              best = { idx: i, sep: cand, score };
+      (function alwaysFreshStart() {
+        try {
+          const keep = new URLSearchParams(location.search).has("keep");
+          if (keep) return;
+          localStorage.removeItem(DRAFT_KEYS.base);
+          localStorage.removeItem(DRAFT_KEYS.subm);
+          localStorage.removeItem(DRAFT_KEYS.opts);
+          localStorage.removeItem(CHECK_STORE_KEY);
+          localStorage.removeItem(PERCOND_STORE_KEY);
+          const $base = document.getElementById("base");
+          const $subm = document.getElementById("subm");
+          if ($base) $base.value = "";
+          if ($subm) $subm.value = "";
+          const $out = document.getElementById("out");
+          if ($out) {
+            $out.innerHTML = "";
+            $out.style.display = "none";
           }
-        }
-        return best;
+        } catch (e) {}
+      })();
+
+      const esc = (s) => String(s ?? "");
+      function detectSepSmart(text) {
+        if (text.includes("\t")) return "\t";
+        const f = text.replace(/\r/g, "").trim().split("\n")[0] || "";
+        const H = ["품번", "수량", "디스크립션", "LVL", "I.S", "IS"];
+        const sc = (sep) =>
+          f
+            .split(sep)
+            .map((s) => s.trim().toUpperCase())
+            .reduce((a, c) => a + (H.includes(c) ? 1 : 0), 0);
+        if (f.includes(";") && sc(";") >= 2) return ";";
+        if (f.includes(",") && sc(",") >= 2) return ",";
+        return null;
       }
-      let { idx: headIdx, sep } = detectHeader(lines);
-      if (headIdx < 0) {
-        sep = detectSepSmart(text);
-        headIdx = 0;
+      function splitRow(row, sep) {
+        return sep ? row.split(sep) : row.trim().split(/\s{2,}/);
       }
-      const headRaw = sep
-        ? lines[headIdx].split(sep).map((h) => h.trim())
-        : lines[headIdx].trim().split(/\s+/);
-      const headNorm = headRaw.map(normalizeHeader);
-      const findByLabel = (...labels) => {
-        const t = labels.map(normalizeHeader);
-        for (let i = 0; i < headNorm.length; i++)
-          if (t.includes(headNorm[i])) return i;
-        return -1;
-      };
-      const findByCustom = (name) => {
-        if (!name) return -1;
-        const t = normalizeHeader(name);
-        for (let i = 0; i < headNorm.length; i++)
-          if (headNorm[i] === t) return i;
-        return -1;
-      };
-      const idxPart = findByLabel("품번", "PART", "P/N", "PN", "PART NO");
-      const idxQty = findByLabel("수량", "QTY", "QUANTITY");
-      const idxDesc = findByLabel("디스크립션", "DESCRIPTION", "DESC");
-      const idxLvl = findByCustom(lvlColName);
-      const idxIS = findByCustom(isColName);
-      const loose = idxPart < 0 || idxQty < 0;
-
-      const filterInvalidBase = (arr) =>
-        arr.filter((x) => {
-          if (!isBase) return true;
-          const p = (x.part || "").toUpperCase();
-          return !(p === "0" || p === "-" || p === "N/A");
-        });
-
-      if (!loose) {
-        const arr = lines
-          .slice(headIdx + 1)
-          .map((row) => {
-            const c = splitRow(row, sep);
-            return {
-              part: cleanCell(c[idxPart], "part"),
-              qty: cleanCell(c[idxQty], "qty"),
-              desc: idxDesc >= 0 ? cleanCell(c[idxDesc], "desc") : "",
-              lvl: idxLvl >= 0 ? cleanCell(c[idxLvl], "desc") : "",
-              isv: idxIS >= 0 ? cleanCell(c[idxIS], "desc") : "",
-            };
-          })
-          .filter(
-            (x) =>
-              x.part !== "" ||
-              x.qty !== "" ||
-              x.desc !== "" ||
-              x.lvl !== "" ||
-              x.isv !== ""
-          );
-        return filterInvalidBase(arr);
-      } else {
-        const arr = lines
-          .slice(headIdx + 1)
-          .map(parseLooseRow)
-          .filter(
-            (x) =>
-              x.part !== "" ||
-              x.qty !== "" ||
-              x.desc !== "" ||
-              x.lvl !== "" ||
-              x.isv !== ""
-          );
-        return filterInvalidBase(arr);
+      function cleanCell(v, mode) {
+        if (v == null) return "";
+        let s = String(v)
+          .replace(/\u00A0/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (mode === "part") return s.toUpperCase().replace(/\s+/g, "");
+        if (mode === "desc") return s.toUpperCase();
+        return s;
       }
-    }
 
-    /* ===== 기준 중복 통합 ===== */
-    function mergeBaseByPart(baseItems) {
-      const map = new Map();
-      for (const it of baseItems) {
-        if (!map.has(it.part)) map.set(it.part, { part: it.part, qty: 0 });
-        map.get(it.part).qty += num(it.qty);
+      // ⬇️ 추가: 기준 목록에서 제외할 품번 규칙(공백, "-", "N/A", 전부 0, 한글 포함)
+      function isInvalidPartForBase(raw) {
+        const sRaw = String(raw ?? "");
+        const s = sRaw.toUpperCase().replace(/\s+/g, "");
+        if (!s) return true; // 공백
+        if (s === "-" || s === "N/A") return true;
+        if (/^0+$/.test(s)) return true; // 0, 00, 000...
+        if (/[\u3131-\u318E\uAC00-\uD7A3]/.test(sRaw)) return true; // 한글 포함
+        return false;
       }
-      return Array.from(map.values()).map((r) => ({
-        part: r.part,
-        qty: r.qty,
-        desc: "",
-      }));
-    }
 
-    /* ===== 버킷 ===== */
-    function bucketBase(items) {
-      const m = new Map();
-      for (const it of items) {
-        const k = it.part;
-        const r = m.get(k) || {
-          part: it.part,
-          descs: new Set(),
-          qtys: [],
-          ptr: 0,
-        };
-        r.qtys.push(num(it.qty));
-        if (it.desc) r.descs.add(it.desc);
-        m.set(k, r);
-      }
-      return m;
-    }
-    function consumeBaseQty(b, key) {
-      const r = b.get(key);
-      if (!r) return 0;
-      const i = r.ptr || 0;
-      const q = i < r.qtys.length ? r.qtys[i] : 0;
-      r.ptr = i + 1;
-      return q;
-    }
-    function baseTotal(b, key) {
-      const r = b.get(key);
-      if (!r) return 0;
-      return r.qtys.reduce((a, c) => a + c, 0);
-    }
-    function bucketSubRaw(items) {
-      const m = new Map();
-      for (const it of items) {
-        const k = it.part;
-        const r = m.get(k) || { part: it.part, byDesc: new Map(), rows: [] };
-        r.rows.push({
-          qty: num(it.qty),
-          lvl: (it.lvl || "").toUpperCase().trim(),
-          isv: (it.isv || "").toUpperCase().trim(),
-          desc: it.desc || "",
-        });
-        if (it.desc) {
-          const d = it.desc;
-          const list = r.byDesc.get(d) || [];
-          list.push(r.rows[r.rows.length - 1]);
-          r.byDesc.set(d, list);
-        }
-        m.set(k, r);
-      }
-      return m;
-    }
-
-    /* ===== 로컬스토리지 ===== */
-    function loadJson(key, fb) {
-      try {
-        return JSON.parse(localStorage.getItem(key) || fb);
-      } catch (e) {
-        return JSON.parse(fb);
-      }
-    }
-    function saveJson(key, obj) {
-      try {
-        localStorage.setItem(key, JSON.stringify(obj));
-      } catch (e) {}
-    }
-
-    let perCondMap = loadJson(PERCOND_STORE_KEY, "{}");
-    let checkMap = loadJson(CHECK_STORE_KEY, "{}");
-    let descPresets = loadJson(PRESET_STORE_KEY, "{}");
-
-    /* ===== 키/조건 ===== */
-    function rowKey(part, occIdx) {
-      return `${String(part || "")
-        .toUpperCase()
-        .replace(/\s+/g, "")}||#${occIdx}`;
-    }
-    function keyDesc(desc) {
-      return String(desc || "")
-        .toUpperCase()
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-    function normalizeLvl(s) {
-      const t = String(s || "")
-        .toUpperCase()
-        .trim()
-        .replace(/,/g, "");
-      const m = t.match(/^[\.\u00B7\u2026\u2219\u22C5\u2022\s]*?(\d+)\s*$/);
-      return m ? "#" + m[1] : t;
-    }
-
-    /* ===== 조건 평가 ===== */
-    function checkByCond(row, cfg) {
-      if (!cfg || !cfg.enabled) return { ok: true, reason: "" };
-      const wantsLvl = String(cfg.lvl || "").trim() !== "";
-      const wantsIsv = String(cfg.isv || "").trim() !== "";
-      if (!wantsLvl && !wantsIsv) return { ok: true, reason: "" };
-      const rowLvl = normalizeLvl(row && row.lvl);
-      const cfgLvl = normalizeLvl(cfg && cfg.lvl);
-      const rowIsv = String((row && row.isv) || "")
-        .toUpperCase()
-        .trim();
-      const cfgIsv = String((cfg && cfg.isv) || "")
-        .toUpperCase()
-        .trim();
-      const isHash = (v) => typeof v === "string" && v[0] === "#";
-      const eqLvl = wantsLvl
-        ? isHash(rowLvl) && isHash(cfgLvl)
-          ? rowLvl === cfgLvl
-          : String((row && row.lvl) || "")
-              .toUpperCase()
-              .trim() ===
-            String((cfg && cfg.lvl) || "")
-              .toUpperCase()
-              .trim()
-        : null;
-      const eqIsv = wantsIsv ? rowIsv === cfgIsv : null;
-      let ok;
-      if ((cfg.mode || "OR").toUpperCase() === "AND")
-        ok = (wantsLvl ? eqLvl : true) && (wantsIsv ? eqIsv : true);
-      else ok = (wantsLvl ? eqLvl : false) || (wantsIsv ? eqIsv : false);
-      let reason = "";
-      if (!ok) {
-        if (wantsLvl && !eqLvl) reason += `LVL≠${cfg.lvl} `;
-        if (wantsIsv && !eqIsv) reason += `IS≠${cfg.isv} `;
-      }
-      return { ok, reason: reason.trim() };
-    }
-
-    /* ===== 렌더링 ===== */
-    function normalizeLvlDigits(v) {
-      const m = String(v || "").match(/(\d+)/);
-      return m ? m[1] : "";
-    }
-    function renderLvlSelect(cur, cls) {
-      const sel = normalizeLvlDigits(cur);
-      return `<select class="${cls}">
-        <option value="" ${sel === "" ? "selected" : ""}></option>
-        <option value="1" ${sel === "1" ? "selected" : ""}>1</option>
-        <option value="2" ${sel === "2" ? "selected" : ""}>2</option>
-        <option value="3" ${sel === "3" ? "selected" : ""}>3</option>
-        <option value="4" ${sel === "4" ? "selected" : ""}>4</option>
-      </select>`;
-    }
-    function fmtSign(v) {
-      if (v == null || isNaN(v)) return "";
-      const n = Number(v);
-      return Number.isInteger(n) ? n.toString() : n.toFixed(2);
-    }
-
-    let lastResult = [];
-    function renderTable(rows, defaults) {
-      lastResult = rows.slice();
-      const outEl = document.getElementById("out");
-
-      const onlyUnchecked = document.getElementById("showCheckedOnly").checked;
-      const showOKOnly = !!document.getElementById("filterOk")?.checked;
-      const showNGOnly = !!document.getElementById("filterNg")?.checked;
-
-      let filtered = onlyUnchecked
-        ? rows.filter((r) => !checkMap[r._key])
-        : rows;
-      filtered = filtered.filter((r) => {
-        if (showOKOnly && !showNGOnly) return r["판정"] === "OK";
-        if (showNGOnly && !showOKOnly) return r["판정"] === "NG";
-        return true;
-      });
-
-      const agg = document.getElementById("aggMode").checked;
-      const colsAgg = [
-        "No.",
-        "품번",
-        "디스크립션",
-        "기준수량",
-        "제출수량",
-        "차이",
-        "조건",
-      ];
-      const colsBase = [
-        "No.",
-        "품번",
-        "디스크립션",
-        "기준수량",
-        "제출수량",
-        "차이",
-        "기준합산",
-        "품번합산",
-        "조건사용",
-        "모드",
-        "조건",
-      ];
-      const colsEdit = ["Lvl 입력값", "I.S 입력값", "판정", "확인"];
-      const cols = agg ? colsAgg : [...colsBase, ...colsEdit];
-
-      let html =
-        '<div style="max-height:60vh;overflow:auto"><table><thead><tr>';
-      for (const c of cols) html += `<th>${c}</th>`;
-      html += "</tr></thead><tbody>";
-
-      const align = (col) =>
-        col === "디스크립션" || col === "조건" ? "left" : "center";
-      filtered.forEach((r, i) => {
-        const checked = !!checkMap[r._key];
-        const rk = r._rk;
-        const pKey = String(r["품번"] || "")
+      function normalizeHeader(h) {
+        return String(h || "")
           .toUpperCase()
-          .replace(/\s+/g, "");
-
-        const preset = descPresets[keyDesc(r["디스크립션"])] || {};
-        const rowSaved = perCondMap[rk] || {};
-        const partSaved = perCondMap[pKey] || {};
-
-        const rowCfg = {
-          enabled:
-            rowSaved.enabled ?? preset.enabled ?? defaults.enabled ?? false,
-          lvl: rowSaved.lvl ?? preset.lvl ?? defaults.lvlReq ?? "",
-          isv: rowSaved.isv ?? preset.isv ?? defaults.isReq ?? "",
-          mode: rowSaved.mode ?? preset.mode ?? defaults.condMode ?? "OR",
+          .replace(/[.\s/_()\-\u200b]/g, "");
+      }
+      function parseLooseRow(line) {
+        const m = line.trim().match(/^(\S+)\s+(\S+)\s*(.*)$/);
+        if (!m) return { part: "", qty: "", desc: "", lvl: "", isv: "" };
+        return {
+          part: cleanCell(m[1], "part"),
+          qty: cleanCell(m[2], "qty"),
+          desc: cleanCell(m[3], "desc"),
+          lvl: "",
+          isv: "",
         };
-        const partCfg = {
-          aggregate: partSaved.aggregate ?? preset.aggregate ?? false,
-          baseMerge: partSaved.baseMerge ?? preset.baseMerge ?? false,
-        };
-
-        html += `<tr data-rk="${rk}" data-pkey="${pKey}" data-desc="${keyDesc(
-          r["디스크립션"]
-        )}">`;
-        cols.forEach((c) => {
-          if (c === "No.") {
-            html += `<td style="text-align:${align(c)}">${i + 1}</td>`;
-            return;
-          }
-          if (["기준수량", "제출수량"].includes(c)) {
-            html += `<td style="text-align:${align(c)}">${r[c]}</td>`;
-            return;
-          }
-          if (c === "차이") {
-            const v = Number(r[c]) || 0;
-            const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
-            html += `<td class="${cls}" style="text-align:${align(
-              c
-            )}">${fmtSign(v)}</td>`;
-            return;
-          }
-          if (c === "조건") {
-            html += `<td style="text-align:${align(c)}">${
-              r["_cond"] || ""
-            }</td>`;
-            return;
-          }
-          if (!agg && c === "조건사용") {
-            html += `<td style="text-align:center"><input type="checkbox" class="pc-enabled" ${
-              rowCfg.enabled ? "checked" : ""
-            }></td>`;
-            return;
-          }
-          if (!agg && c === "Lvl 입력값") {
-            html += `<td style="text-align:center">${renderLvlSelect(
-              rowCfg.lvl || "",
-              "pc-lvl"
-            )}</td>`;
-            return;
-          }
-          if (!agg && c === "I.S 입력값") {
-            html += `<td style="text-align:center"><input type="text" class="pc-is" value="${
-              rowCfg.isv || ""
-            }"></td>`;
-            return;
-          }
-          if (!agg && c === "모드") {
-            html += `<td style="text-align:center"><select class="pc-mode"><option value="OR"${
-              rowCfg.mode === "OR" ? " selected" : ""
-            }>OR</option><option value="AND"${
-              rowCfg.mode === "AND" ? " selected" : ""
-            }>AND</option></select></td>`;
-            return;
-          }
-          if (c === "기준합산") {
-            html += `<td style="text-align:center"><input type="checkbox" class="pc-base-merge" ${
-              partCfg.baseMerge ? "checked" : ""
-            }></td>`;
-            return;
-          }
-          if (c === "품번합산") {
-            html += `<td style="text-align:center"><input type="checkbox" class="pc-agg" ${
-              partCfg.aggregate ? "checked" : ""
-            }></td>`;
-            return;
-          }
-          if (c === "판정") {
-            const text = String(r[c] ?? "");
-            const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
-            html += `<td class="${cls}" style="text-align:${align(c)}">${esc(
-              text
-            )}</td>`;
-            return;
-          }
-          if (c === "확인") {
-            html += `<td style="text-align:center"><input type="checkbox" class="rowchk" data-key="${
-              r._key
-            }" ${checked ? "checked" : ""}></td>`;
-            return;
-          }
-          html += `<td style="text-align:${align(c)}">${r[c] ?? ""}</td>`;
-        });
-        html += "</tr>";
-      });
-
-      html += "</tbody></table></div>";
-      outEl.innerHTML = html;
-      outEl.style.display = "block";
-
-      bindRowHover(outEl.querySelector("table"));
-
-      outEl.querySelectorAll(".rowchk").forEach((cb) => {
-        cb.addEventListener("change", () => {
-          const k = cb.dataset.key;
-          const tr = cb.closest("tr");
-          if (cb.checked) checkMap[k] = true;
-          else delete checkMap[k];
-          saveJson(CHECK_STORE_KEY, checkMap);
-          const onlyUnconfirmed =
-            document.getElementById("showCheckedOnly").checked;
-          if (onlyUnconfirmed) {
-            tr.style.display = cb.checked ? "none" : "";
-            const anyVisible = !!outEl.querySelector(
-              "tbody tr:not([style*='display: none'])"
-            );
-            if (!anyVisible) outEl.style.display = "none";
-          }
-        });
-      });
-
-      if (!agg) {
-        outEl.querySelectorAll("tr[data-rk]").forEach((tr) => {
-          const rk = tr.getAttribute("data-rk");
-          const pKey = tr.getAttribute("data-pkey");
-          const en = tr.querySelector(".pc-enabled");
-          const lvl = tr.querySelector(".pc-lvl");
-          const isv = tr.querySelector(".pc-is");
-          const md = tr.querySelector(".pc-mode");
-          const aggEl = tr.querySelector(".pc-agg");
-          const baseEl = tr.querySelector(".pc-base-merge");
-          function save() {
-            perCondMap[rk] = {
-              enabled: !!(en && en.checked),
-              lvl: lvl ? lvl.value : "",
-              isv: isv ? isv.value : "",
-              mode: md ? md.value : "OR",
-            };
-            const prev = perCondMap[pKey] || {};
-            perCondMap[pKey] = {
-              ...prev,
-              aggregate: !!(aggEl && aggEl.checked),
-              baseMerge: !!(baseEl && baseEl.checked),
-            };
-            saveJson(PERCOND_STORE_KEY, perCondMap);
-          }
-          [en, lvl, isv, md, aggEl, baseEl].forEach((el) => {
-            if (el) el.addEventListener("change", save);
-          });
-          if (isv) isv.addEventListener("input", save);
-        });
+      }
+      function num(x) {
+        if (x == null) return 0;
+        const s = String(x).replace(/,/g, "").replace(/\s+/g, "");
+        if (s === "" || s.toLowerCase() === "nan") return 0;
+        const v = parseFloat(s);
+        return isNaN(v) ? 0 : v;
       }
 
-      const dl = document.getElementById("dl");
-      dl.style.display = rows.length ? "inline-block" : "none";
-      // ↓ 기존 dl.onclick = () => { ... } 를 이 코드로 통째로 교체
-      dl.onclick = () => {
-        // 1) 열 헤더(순서 고정)
-        const cols = [
+      /* ===== 파서 ===== */
+      function parseTable(
+        text,
+        isBase = false,
+        lvlColName = null,
+        isColName = null
+      ) {
+        if (!text || !text.trim()) return [];
+        const lines = text.replace(/\r/g, "").trim().split("\n");
+        function detectHeader(lines) {
+          const CANDS = ["\t", ";", ",", null];
+          const HEADS = new Set(
+            [
+              "품번",
+              "PART",
+              "P/N",
+              "PN",
+              "PART NO",
+              "수량",
+              "QTY",
+              "QUANTITY",
+              "디스크립션",
+              "DESCRIPTION",
+              "DESC",
+              "LVL",
+              "I.S",
+              "IS",
+            ].map(normalizeHeader)
+          );
+          let best = { idx: -1, sep: null, score: -1 };
+          for (let i = 0; i < Math.min(lines.length, 20); i++) {
+            const raw = (lines[i] || "").trim();
+            if (!raw) continue;
+            for (const cand of CANDS) {
+              const cells = cand
+                ? raw.split(cand).map((s) => s.trim())
+                : raw.split(/\s+/);
+              const norm = cells.map(normalizeHeader);
+              let score = 0;
+              for (const h of norm) if (HEADS.has(h)) score++;
+              if (score >= 2 && score > best.score)
+                best = { idx: i, sep: cand, score };
+            }
+          }
+          return best;
+        }
+        let { idx: headIdx, sep } = detectHeader(lines);
+        if (headIdx < 0) {
+          sep = detectSepSmart(text);
+          headIdx = 0;
+        }
+        const headRaw = sep
+          ? lines[headIdx].split(sep).map((h) => h.trim())
+          : lines[headIdx].trim().split(/\s+/);
+        const headNorm = headRaw.map(normalizeHeader);
+        const findByLabel = (...labels) => {
+          const t = labels.map(normalizeHeader);
+          for (let i = 0; i < headNorm.length; i++)
+            if (t.includes(headNorm[i])) return i;
+          return -1;
+        };
+        const findByCustom = (name) => {
+          if (!name) return -1;
+          const t = normalizeHeader(name);
+          for (let i = 0; i < headNorm.length; i++)
+            if (headNorm[i] === t) return i;
+          return -1;
+        };
+        const idxPart = findByLabel("품번", "PART", "P/N", "PN", "PART NO");
+        const idxQty = findByLabel("수량", "QTY", "QUANTITY");
+        const idxDesc = findByLabel("디스크립션", "DESCRIPTION", "DESC");
+        const idxLvl = findByCustom(lvlColName);
+        const idxIS = findByCustom(isColName);
+        const loose = idxPart < 0 || idxQty < 0;
+
+        // ⬇️ 수정: 기준 목록일 때만 무효 품번 행 제거
+        const filterInvalidBase = (arr) =>
+          arr.filter((x) => (isBase ? !isInvalidPartForBase(x.part) : true));
+
+        if (!loose) {
+          const arr = lines
+            .slice(headIdx + 1)
+            .map((row) => {
+              const c = splitRow(row, sep);
+              return {
+                part: cleanCell(c[idxPart], "part"),
+                qty: cleanCell(c[idxQty], "qty"),
+                desc: idxDesc >= 0 ? cleanCell(c[idxDesc], "desc") : "",
+                lvl: idxLvl >= 0 ? cleanCell(c[idxLvl], "desc") : "",
+                isv: idxIS >= 0 ? cleanCell(c[idxIS], "desc") : "",
+              };
+            })
+            .filter(
+              (x) =>
+                x.part !== "" ||
+                x.qty !== "" ||
+                x.desc !== "" ||
+                x.lvl !== "" ||
+                x.isv !== ""
+            );
+          return filterInvalidBase(arr);
+        } else {
+          const arr = lines
+            .slice(headIdx + 1)
+            .map(parseLooseRow)
+            .filter(
+              (x) =>
+                x.part !== "" ||
+                x.qty !== "" ||
+                x.desc !== "" ||
+                x.lvl !== "" ||
+                x.isv !== ""
+            );
+          return filterInvalidBase(arr);
+        }
+      }
+
+      function mergeBaseByPart(baseItems) {
+        const map = new Map();
+        for (const it of baseItems) {
+          if (!map.has(it.part)) map.set(it.part, { part: it.part, qty: 0 });
+          map.get(it.part).qty += num(it.qty);
+        }
+        return Array.from(map.values()).map((r) => ({
+          part: r.part,
+          qty: r.qty,
+          desc: "",
+        }));
+      }
+
+      function bucketBase(items) {
+        const m = new Map();
+        for (const it of items) {
+          const k = it.part;
+          const r = m.get(k) || {
+            part: it.part,
+            descs: new Set(),
+            qtys: [],
+            ptr: 0,
+          };
+          r.qtys.push(num(it.qty));
+          if (it.desc) r.descs.add(it.desc);
+          m.set(k, r);
+        }
+        return m;
+      }
+      function consumeBaseQty(b, key) {
+        const r = b.get(key);
+        if (!r) return 0;
+        const i = r.ptr || 0;
+        const q = i < r.qtys.length ? r.qtys[i] : 0;
+        r.ptr = i + 1;
+        return q;
+      }
+      function baseTotal(b, key) {
+        const r = b.get(key);
+        if (!r) return 0;
+        return r.qtys.reduce((a, c) => a + c, 0);
+      }
+      function bucketSubRaw(items) {
+        const m = new Map();
+        for (const it of items) {
+          const k = it.part;
+          const r = m.get(k) || { part: it.part, byDesc: new Map(), rows: [] };
+          r.rows.push({
+            qty: num(it.qty),
+            lvl: (it.lvl || "").toUpperCase().trim(),
+            isv: (it.isv || "").toUpperCase().trim(),
+            desc: it.desc || "",
+          });
+          if (it.desc) {
+            const d = it.desc;
+            const list = r.byDesc.get(d) || [];
+            list.push(r.rows[r.rows.length - 1]);
+            r.byDesc.set(d, list);
+          }
+          m.set(k, r);
+        }
+        return m;
+      }
+
+      /* === 변경: 같은 Description을 전체 제출에서 수집하는 헬퍼 추가 === */
+      function findSubRowsByDesc(subBucket, desc) {
+        const key = desc || "";
+        const list = [];
+        const parts = new Set();
+        for (const [p, rec] of subBucket.entries()) {
+          const arr = rec.byDesc.get(key);
+          if (arr && arr.length) {
+            parts.add(p);
+            arr.forEach((r) => list.push({ part: p, row: r }));
+          }
+        }
+        return { list, parts: Array.from(parts) };
+      }
+      /* === 변경 끝 === */
+
+      function loadJson(key, fb) {
+        try {
+          return JSON.parse(localStorage.getItem(key) || fb);
+        } catch (e) {
+          return JSON.parse(fb);
+        }
+      }
+      function saveJson(key, obj) {
+        try {
+          localStorage.setItem(key, JSON.stringify(obj));
+        } catch (e) {}
+      }
+
+      let perCondMap = loadJson(PERCOND_STORE_KEY, "{}");
+      let checkMap = loadJson(CHECK_STORE_KEY, "{}");
+      let descPresets = loadJson(PRESET_STORE_KEY, "{}");
+
+      function rowKey(part, occIdx) {
+        return `${String(part || "")
+          .toUpperCase()
+          .replace(/\s+/g, "")}||#${occIdx}`;
+      }
+      function keyDesc(desc) {
+        return String(desc || "")
+          .toUpperCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+      function normalizeLvl(s) {
+        const t = String(s || "")
+          .toUpperCase()
+          .trim()
+          .replace(/,/g, "");
+        const m = t.match(/^[\.\u00B7\u2026\u2219\u22C5\u2022\s]*?(\d+)\s*$/);
+        return m ? "#" + m[1] : t;
+      }
+
+      function checkByCond(row, cfg) {
+        if (!cfg || !cfg.enabled) return { ok: true, reason: "" };
+        const wantsLvl = String(cfg.lvl || "").trim() !== "";
+        const wantsIsv = String(cfg.isv || "").trim() !== "";
+        if (!wantsLvl && !wantsIsv) return { ok: true, reason: "" };
+        const rowLvl = normalizeLvl(row && row.lvl);
+        const cfgLvl = normalizeLvl(cfg && cfg.lvl);
+        const rowIsv = String((row && row.isv) || "")
+          .toUpperCase()
+          .trim();
+        const cfgIsv = String((cfg && cfg.isv) || "")
+          .toUpperCase()
+          .trim();
+        const isHash = (v) => typeof v === "string" && v[0] === "#";
+        const eqLvl = wantsLvl
+          ? isHash(rowLvl) && isHash(cfgLvl)
+            ? rowLvl === cfgLvl
+            : String((row && row.lvl) || "")
+                .toUpperCase()
+                .trim() ===
+              String((cfg && cfg.lvl) || "")
+                .toUpperCase()
+                .trim()
+          : null;
+        const eqIsv = wantsIsv ? rowIsv === cfgIsv : null;
+        let ok;
+        if ((cfg.mode || "OR").toUpperCase() === "AND")
+          ok = (wantsLvl ? eqLvl : true) && (wantsIsv ? eqIsv : true);
+        else ok = (wantsLvl ? eqLvl : false) || (wantsIsv ? eqIsv : false);
+        let reason = "";
+        if (!ok) {
+          if (wantsLvl && !eqLvl) reason += `LVL≠${cfg.lvl} `;
+          if (wantsIsv && !eqIsv) reason += `IS≠${cfg.isv} `;
+        }
+        return { ok, reason: reason.trim() };
+      }
+
+      function normalizeLvlDigits(v) {
+        const m = String(v || "").match(/(\d+)/);
+        return m ? m[1] : "";
+      }
+      function renderLvlSelect(cur, cls) {
+        const sel = normalizeLvlDigits(cur);
+        return `<select class="${cls}">
+          <option value="" ${sel === "" ? "selected" : ""}></option>
+          <option value="1" ${sel === "1" ? "selected" : ""}>1</option>
+          <option value="2" ${sel === "2" ? "selected" : ""}>2</option>
+          <option value="3" ${sel === "3" ? "selected" : ""}>3</option>
+          <option value="4" ${sel === "4" ? "selected" : ""}>4</option>
+        </select>`;
+      }
+      function fmtSign(v) {
+        if (v == null || isNaN(v)) return "";
+        const n = Number(v);
+        return Number.isInteger(n) ? n.toString() : n.toFixed(2);
+      }
+
+      let lastResult = [];
+      function renderTable(rows, defaults) {
+        lastResult = rows.slice();
+        const outEl = document.getElementById("out");
+
+        const onlyUnchecked =
+          document.getElementById("showCheckedOnly").checked;
+        const showOKOnly = !!document.getElementById("filterOk")?.checked;
+        const showNGOnly = !!document.getElementById("filterNg")?.checked;
+
+        let filtered = onlyUnchecked
+          ? rows.filter((r) => !checkMap[r._key])
+          : rows;
+        filtered = filtered.filter((r) => {
+          if (showOKOnly && !showNGOnly) return r["판정"] === "OK";
+          if (showNGOnly && !showOKOnly) return r["판정"] === "NG";
+          return true;
+        });
+
+        const agg = document.getElementById("aggMode").checked;
+        const colsAgg = [
           "No.",
           "품번",
           "디스크립션",
           "기준수량",
           "제출수량",
           "차이",
-          "판정",
+          "조건",
         ];
+        const colsBase = [
+          "No.",
+          "품번",
+          "디스크립션",
+          "기준수량",
+          "제출수량",
+          "차이",
+          "기준합산",
+          "품번합산",
+          "조건사용",
+          "모드",
+          "조건",
+        ];
+        const colsEdit = ["Lvl 입력값", "I.S 입력값", "판정", "확인"];
+        const cols = agg ? colsAgg : [...colsBase, ...colsEdit];
 
-        // 2) CSV 안전 이스케이프 (콤마/줄바꿈/따옴표 모두 처리)
-        const csvEscape = (v) => {
-          const s = String(v ?? "");
-          // 줄바꿈 통일 (엑셀/윈도우 호환)
-          const t = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-          // 따옴표 이스케이프
-          const q = t.replace(/"/g, '""');
-          return `"${q}"`;
+        let html =
+          '<div style="max-height:60vh;overflow:auto"><table><thead><tr>';
+        for (const c of cols) html += `<th>${c}</th>`;
+        html += "</tr></thead><tbody>";
+
+        const align = (col) =>
+          col === "디스크립션" || col === "조건" ? "left" : "center";
+        filtered.forEach((r, i) => {
+          const checked = !!checkMap[r._key];
+          const rk = r._rk;
+          const pKey = String(r["품번"] || "")
+            .toUpperCase()
+            .replace(/\s+/g, "");
+
+          const preset = descPresets[keyDesc(r["디스크립션"])] || {};
+          const rowSaved = perCondMap[rk] || {};
+          const partSaved = perCondMap[pKey] || {};
+
+          const rowCfg = {
+            enabled:
+              rowSaved.enabled ?? preset.enabled ?? defaults.enabled ?? false,
+            lvl: rowSaved.lvl ?? preset.lvl ?? defaults.lvlReq ?? "",
+            isv: rowSaved.isv ?? preset.isv ?? defaults.isReq ?? "",
+            mode: rowSaved.mode ?? preset.mode ?? defaults.condMode ?? "OR",
+          };
+          const partCfg = {
+            aggregate: partSaved.aggregate ?? preset.aggregate ?? false,
+            baseMerge: partSaved.baseMerge ?? preset.baseMerge ?? false,
+          };
+
+          html += `<tr data-rk="${rk}" data-pkey="${pKey}" data-desc="${keyDesc(
+            r["디스크립션"]
+          )}">`;
+          cols.forEach((c) => {
+            if (c === "No.") {
+              html += `<td style="text-align:${align(c)}">${i + 1}</td>`;
+              return;
+            }
+            if (["기준수량", "제출수량"].includes(c)) {
+              html += `<td style="text-align:${align(c)}">${r[c]}</td>`;
+              return;
+            }
+            if (c === "차이") {
+              const v = Number(r[c]) || 0;
+              const cls = v > 0 ? "pos" : v < 0 ? "neg" : "";
+              html += `<td class="${cls}" style="text-align:${align(
+                c
+              )}">${fmtSign(v)}</td>`;
+              return;
+            }
+            if (c === "조건") {
+              const condText = r["_cond"] || "";
+              const isMismatch = condText.startsWith("품번 불일치");
+              html += `<td style="text-align:${align(c)}; ${
+                isMismatch ? "color:#c62828;font-weight:700;" : ""
+              }">${isMismatch ? "⚠ " : ""}${condText}</td>`;
+              return;
+            }
+
+            if (!agg && c === "조건사용") {
+              html += `<td style="text-align:center"><input type="checkbox" class="pc-enabled" ${
+                rowCfg.enabled ? "checked" : ""
+              }></td>`;
+              return;
+            }
+            if (!agg && c === "Lvl 입력값") {
+              html += `<td style="text-align:center">${renderLvlSelect(
+                rowCfg.lvl || "",
+                "pc-lvl"
+              )}</td>`;
+              return;
+            }
+            if (!agg && c === "I.S 입력값") {
+              html += `<td style="text-align:center"><input type="text" class="pc-is" value="${
+                rowCfg.isv || ""
+              }"></td>`;
+              return;
+            }
+            if (!agg && c === "모드") {
+              html += `<td style="text-align:center"><select class="pc-mode"><option value="OR"${
+                rowCfg.mode === "OR" ? " selected" : ""
+              }>OR</option><option value="AND"${
+                rowCfg.mode === "AND" ? " selected" : ""
+              }>AND</option></select></td>`;
+              return;
+            }
+            if (c === "기준합산") {
+              html += `<td style="text-align:center"><input type="checkbox" class="pc-base-merge" ${
+                partCfg.baseMerge ? "checked" : ""
+              }></td>`;
+              return;
+            }
+            if (c === "품번합산") {
+              html += `<td style="text-align:center"><input type="checkbox" class="pc-agg" ${
+                partCfg.aggregate ? "checked" : ""
+              }></td>`;
+              return;
+            }
+            if (c === "판정") {
+              const text = String(r[c] ?? "");
+              const cls = text === "OK" ? "ok" : text === "NG" ? "neg" : "";
+              html += `<td class="${cls}" style="text-align:${align(c)}">${esc(
+                text
+              )}</td>`;
+              return;
+            }
+            if (c === "확인") {
+              html += `<td style="text-align:center"><input type="checkbox" class="rowchk" data-key="${
+                r._key
+              }" ${checked ? "checked" : ""}></td>`;
+              return;
+            }
+            html += `<td style="text-align:${align(c)}">${r[c] ?? ""}</td>`;
+          });
+          html += "</tr>";
+        });
+
+        html += "</tbody></table></div>";
+        outEl.innerHTML = html;
+        outEl.style.display = "block";
+
+        bindRowHover(outEl.querySelector("table"));
+
+        outEl.querySelectorAll(".rowchk").forEach((cb) => {
+          cb.addEventListener("change", () => {
+            const k = cb.dataset.key;
+            const tr = cb.closest("tr");
+            if (cb.checked) checkMap[k] = true;
+            else delete checkMap[k];
+            saveJson(CHECK_STORE_KEY, checkMap);
+            const onlyUnconfirmed =
+              document.getElementById("showCheckedOnly").checked;
+            if (onlyUnconfirmed) {
+              tr.style.display = cb.checked ? "none" : "";
+              const anyVisible = !!outEl.querySelector(
+                "tbody tr:not([style*='display: none'])"
+              );
+              if (!anyVisible) outEl.style.display = "none";
+            }
+          });
+        });
+
+        if (!agg) {
+          outEl.querySelectorAll("tr[data-rk]").forEach((tr) => {
+            const rk = tr.getAttribute("data-rk");
+            const pKey = tr.getAttribute("data-pkey");
+            const en = tr.querySelector(".pc-enabled");
+            const lvl = tr.querySelector(".pc-lvl");
+            const isv = tr.querySelector(".pc-is");
+            const md = tr.querySelector(".pc-mode");
+            const aggEl = tr.querySelector(".pc-agg");
+            const baseEl = tr.querySelector(".pc-base-merge");
+            function save() {
+              perCondMap[rk] = {
+                enabled: !!(en && en.checked),
+                lvl: lvl ? lvl.value : "",
+                isv: isv ? isv.value : "",
+                mode: md ? md.value : "OR",
+              };
+              const prev = perCondMap[pKey] || {};
+              perCondMap[pKey] = {
+                ...prev,
+                aggregate: !!(aggEl && aggEl.checked),
+                baseMerge: !!(baseEl && baseEl.checked),
+              };
+              saveJson(PERCOND_STORE_KEY, perCondMap);
+            }
+            [en, lvl, isv, md, aggEl, baseEl].forEach((el) => {
+              if (el) el.addEventListener("change", save);
+            });
+            if (isv) isv.addEventListener("input", save);
+          });
+        }
+
+        const dl = document.getElementById("dl");
+        dl.style.display = rows.length ? "inline-block" : "none";
+        dl.onclick = () => {
+          const cols = [
+            "No.",
+            "품번",
+            "디스크립션",
+            "기준수량",
+            "제출수량",
+            "차이",
+            "판정",
+            "조건",
+            "확인",
+            "기준합산",
+            "품번합산",
+          ];
+          const body = (
+            document.getElementById("showCheckedOnly").checked
+              ? rows.filter((r) => !checkMap[r._key])
+              : rows
+          )
+            .map((r, i) => {
+              const pKey = String(r["품번"] || "")
+                .toUpperCase()
+                .replace(/\s+/g, "");
+              const partCfg = perCondMap[pKey] || {};
+              return [
+                i + 1,
+                r["품번"],
+                r["디스크립션"],
+                r["기준수량"],
+                r["제출수량"],
+                r["차이"],
+                r["판정"],
+                r["_cond"] || "",
+                checkMap[r._key] ? "Y" : "",
+                partCfg.baseMerge ? "Y" : "",
+                partCfg.aggregate ? "Y" : "",
+              ]
+                .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
+                .join(",");
+            })
+            .join("\n");
+          const csv = cols.map((s) => `"${s}"`).join(",") + "\n" + body;
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "비교결과.csv";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
         };
+      }
 
-        // 3) 내보낼 대상 행 선택 (미확인만 내보내기 옵션 유지)
-        const rowsToExport = document.getElementById("showCheckedOnly").checked
-          ? rows.filter((r) => !checkMap[r._key])
-          : rows;
+      document.getElementById("run").addEventListener("click", runCompare);
+      document
+        .getElementById("showCheckedOnly")
+        .addEventListener("change", () =>
+          renderTable(lastResult, { enabled: false })
+        );
 
-        // 4) 본문 구성
-        const body = rowsToExport
-          .map((r, i) => {
-            const pKey = String(r["품번"] || "")
+      function getVisibleRows() {
+        return document.getElementById("showCheckedOnly").checked
+          ? lastResult.filter((r) => !checkMap[r._key])
+          : lastResult.slice();
+      }
+      function bulkCheck(mark = true) {
+        const rows = getVisibleRows();
+        if (!rows.length) return;
+        rows.forEach((r) => {
+          if (mark) checkMap[r._key] = true;
+          else delete checkMap[r._key];
+        });
+        saveJson(CHECK_STORE_KEY, checkMap);
+        renderTable(lastResult, { enabled: false });
+      }
+      document
+        .getElementById("checkAll")
+        .addEventListener("click", () => bulkCheck(true));
+      document
+        .getElementById("uncheckAll")
+        .addEventListener("click", () => bulkCheck(false));
+
+      function onJudgeFilterChange(e) {
+        const okEl = document.getElementById("filterOk");
+        const ngEl = document.getElementById("filterNg");
+        if (e && e.target === okEl && okEl.checked) ngEl.checked = false;
+        if (e && e.target === ngEl && ngEl.checked) okEl.checked = false;
+        if (typeof scheduleSave === "function") scheduleSave();
+        renderTable(lastResult, { enabled: false });
+      }
+      document
+        .getElementById("filterOk")
+        ?.addEventListener("change", onJudgeFilterChange);
+      document
+        .getElementById("filterNg")
+        ?.addEventListener("change", onJudgeFilterChange);
+
+      function runCompare() {
+        try {
+          const pa = document.getElementById("presetArea");
+          if (pa) {
+            descPresets = parsePresetText(pa.value || "");
+          }
+
+          const useDesc = document.getElementById("useDesc").checked;
+          const mergeDup = document.getElementById("mergeBaseDup").checked;
+          const showFail = (document.getElementById(
+            "showFailedCond"
+          ).checked = true);
+          const agg = document.getElementById("aggMode").checked;
+          const aggOnly = document.getElementById("aggCondOnly").checked;
+
+          const advEnabled = document.getElementById("advCondEnabled").checked;
+          const lvlCol =
+            document.getElementById("lvlCol").value.trim() || "Lvl";
+          const isCol = document.getElementById("isCol").value.trim() || "I.S";
+
+          const defaults = {
+            enabled: advEnabled,
+            lvlReq: (document.getElementById("lvlVal").value || "")
+              .toUpperCase()
+              .trim(),
+            isReq: (document.getElementById("isVal").value || "")
+              .toUpperCase()
+              .trim(),
+            condMode: document.getElementById("condMode").value,
+          };
+
+          let baseRaw = parseTable(
+            document.getElementById("base").value,
+            true,
+            null,
+            null
+          );
+          const subm = parseTable(
+            document.getElementById("subm").value,
+            false,
+            lvlCol,
+            isCol
+          );
+
+          const base = mergeDup ? mergeBaseByPart(baseRaw) : baseRaw;
+          const baseBucket = bucketBase(base);
+          const subBucket = bucketSubRaw(subm);
+
+          const occ = new Map();
+          let baseRows = base.map((it) => {
+            const c = (occ.get(it.part) || 0) + 1;
+            occ.set(it.part, c);
+            return { part: it.part, desc: it.desc, occIdx: c };
+          });
+          baseRows = baseRows.filter((br) => {
+            const pKey = String(br.part || "")
               .toUpperCase()
               .replace(/\s+/g, "");
             const partCfg = perCondMap[pKey] || {};
-            const line = [
-              i + 1, // No.
-              r["품번"], // 품번
-              r["디스크립션"], // 디스크립션
-              r["기준수량"], // 기준수량
-              r["제출수량"], // 제출수량
-              r["차이"], // 차이
-              r["판정"], // 판정
-            ];
-            return line.map(csvEscape).join(",");
-          })
-          .join("\r\n");
+            return partCfg.baseMerge ? br.occIdx === 1 : true;
+          });
 
-        // 5) UTF-8 BOM + CRLF로 저장 (엑셀/한글 호환)
-        const header = cols.map(csvEscape).join(",");
-        const csvText = "\uFEFF" + header + "\r\n" + body;
+          function condOfRow(br) {
+            const rk = rowKey(br.part, br.occIdx);
+            const pKey = String(br.part || "")
+              .toUpperCase()
+              .replace(/\s+/g, "");
+            const rowSaved = perCondMap[rk] || null;
+            const partSaved = perCondMap[pKey] || null;
+            const preset = descPresets[keyDesc(br.desc)] || {};
+            return {
+              enabled: rowSaved ? !!rowSaved.enabled : !!preset.enabled,
+              lvl: rowSaved ? rowSaved.lvl ?? "" : preset.lvl ?? "",
+              isv: rowSaved ? rowSaved.isv ?? "" : preset.isv ?? "",
+              mode: rowSaved ? rowSaved.mode ?? "OR" : preset.mode ?? "OR",
+              aggregate: !!(
+                (partSaved && partSaved.aggregate) ||
+                preset.aggregate
+              ),
+              baseMerge: !!(
+                (partSaved && partSaved.baseMerge) ||
+                preset.baseMerge
+              ),
+            };
+          }
 
-        const blob = new Blob([csvText], { type: "text/csv;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "비교결과.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      };
-    }
+          let result = [];
+          if (agg) {
+            const condCfgAgg = {
+              enabled: defaults.enabled,
+              lvl: defaults.lvlReq,
+              isv: defaults.isReq,
+              mode: defaults.condMode,
+            };
+            for (const [part, bRec] of baseBucket.entries()) {
+              const bsum = baseTotal(baseBucket, part);
+              const srec = subBucket.get(part);
+              let ssum = 0;
+              const desc =
+                bRec.descs && bRec.descs.size > 0
+                  ? Array.from(bRec.descs)[0]
+                  : "";
 
-    /* ===== 실행 흐름 ===== */
-    document.getElementById("run").addEventListener("click", runCompare);
-    document
-      .getElementById("showCheckedOnly")
-      .addEventListener("change", () =>
-        renderTable(lastResult, { enabled: false })
-      );
+              /* === 변경: 집계 모드에서 품번이 아예 없을 때, 같은 Description으로 제출된 타 품번 합산 + NG === */
+              if (!srec) {
+                const { list, parts } = findSubRowsByDesc(subBucket, desc);
+                if (list.length) {
+                  if (aggOnly && condCfgAgg.enabled) {
+                    for (const it of list)
+                      if (checkByCond(it.row, condCfgAgg).ok)
+                        ssum += it.row.qty || 0;
+                  } else {
+                    ssum = list.reduce((a, it) => a + (it.row.qty || 0), 0);
+                  }
+                }
+                const delta = ssum - bsum;
+                // 🔁 메시지 통일: 품번이 없으면 항상 "품번 불일치"
+                const hint = parts.length
+                  ? `품번 불일치(${parts.slice(0, 3).join(",")}${
+                      parts.length > 3 ? "…" : ""
+                    })`
+                  : "품번 불일치";
+                result.push({
+                  _key: `${part}||AGG`,
+                  _rk: `${String(part)
+                    .toUpperCase()
+                    .replace(/\s+/g, "")}||#AGG`,
+                  품번: part,
+                  디스크립션: desc,
+                  기준수량: bsum,
+                  제출수량: ssum,
+                  차이: delta,
+                  판정: "NG",
+                  _cond: hint,
+                });
+                continue;
+              }
+              /* === 변경 끝 === */
 
-    function getVisibleRows() {
-      return document.getElementById("showCheckedOnly").checked
-        ? lastResult.filter((r) => !checkMap[r._key])
-        : lastResult.slice();
-    }
-    function bulkCheck(mark = true) {
-      const rows = getVisibleRows();
-      if (!rows.length) return;
-      rows.forEach((r) => {
-        if (mark) checkMap[r._key] = true;
-        else delete checkMap[r._key];
-      });
-      saveJson(CHECK_STORE_KEY, checkMap);
-      renderTable(lastResult, { enabled: false });
-    }
-    document
-      .getElementById("checkAll")
-      .addEventListener("click", () => bulkCheck(true));
-    document
-      .getElementById("uncheckAll")
-      .addEventListener("click", () => bulkCheck(false));
-
-    // ✅ filterOk / filterNg 전역 1회 바인딩 (runCompare 내부 중복 제거)
-    function onJudgeFilterChange(e) {
-      const okEl = document.getElementById("filterOk");
-      const ngEl = document.getElementById("filterNg");
-      if (e && e.target === okEl && okEl.checked) ngEl.checked = false;
-      if (e && e.target === ngEl && ngEl.checked) okEl.checked = false;
-      if (typeof scheduleSave === "function") scheduleSave();
-      renderTable(lastResult, { enabled: false });
-    }
-    document
-      .getElementById("filterOk")
-      ?.addEventListener("change", onJudgeFilterChange);
-    document
-      .getElementById("filterNg")
-      ?.addEventListener("change", onJudgeFilterChange);
-
-    function runCompare() {
-      try {
-        const pa = document.getElementById("presetArea");
-        if (pa) {
-          descPresets = parsePresetText(
-            pa.value || ""
-          ); /* saveJson(PRESET_STORE_KEY, descPresets); */
-        }
-
-        const useDesc = document.getElementById("useDesc").checked; // (읽기용)
-        const mergeDup = document.getElementById("mergeBaseDup").checked;
-        const showFail = (document.getElementById(
-          "showFailedCond"
-        ).checked = true);
-        const agg = document.getElementById("aggMode").checked;
-        const aggOnly = document.getElementById("aggCondOnly").checked;
-
-        const advEnabled = document.getElementById("advCondEnabled").checked;
-        const lvlCol = document.getElementById("lvlCol").value.trim() || "Lvl";
-        const isCol = document.getElementById("isCol").value.trim() || "I.S";
-
-        const defaults = {
-          enabled: advEnabled,
-          lvlReq: (document.getElementById("lvlVal").value || "")
-            .toUpperCase()
-            .trim(),
-          isReq: (document.getElementById("isVal").value || "")
-            .toUpperCase()
-            .trim(),
-          condMode: document.getElementById("condMode").value,
-        };
-
-        let baseRaw = parseTable(
-          document.getElementById("base").value,
-          true,
-          null,
-          null
-        );
-        const subm = parseTable(
-          document.getElementById("subm").value,
-          false,
-          lvlCol,
-          isCol
-        );
-
-        const base = mergeDup ? mergeBaseByPart(baseRaw) : baseRaw;
-        const baseBucket = bucketBase(base);
-        const subBucket = bucketSubRaw(subm);
-
-        const occ = new Map();
-        let baseRows = base.map((it) => {
-          const c = (occ.get(it.part) || 0) + 1;
-          occ.set(it.part, c);
-          return { part: it.part, desc: it.desc, occIdx: c };
-        });
-
-        baseRows = baseRows.filter((br) => {
-          const pKey = String(br.part || "")
-            .toUpperCase()
-            .replace(/\s+/g, "");
-          const partCfg = perCondMap[pKey] || {};
-          return partCfg.baseMerge ? br.occIdx === 1 : true;
-        });
-
-        function condOfRow(br) {
-          const rk = rowKey(br.part, br.occIdx);
-          const pKey = String(br.part || "")
-            .toUpperCase()
-            .replace(/\s+/g, "");
-          const rowSaved = perCondMap[rk] || null;
-          const partSaved = perCondMap[pKey] || null;
-          const preset = descPresets[keyDesc(br.desc)] || {};
-          return {
-            enabled: rowSaved ? !!rowSaved.enabled : !!preset.enabled,
-            lvl: rowSaved ? rowSaved.lvl ?? "" : preset.lvl ?? "",
-            isv: rowSaved ? rowSaved.isv ?? "" : preset.isv ?? "",
-            mode: rowSaved ? rowSaved.mode ?? "OR" : preset.mode ?? "OR",
-            aggregate: !!(
-              (partSaved && partSaved.aggregate) ||
-              preset.aggregate
-            ),
-            baseMerge: !!(
-              (partSaved && partSaved.baseMerge) ||
-              preset.baseMerge
-            ),
-          };
-        }
-
-        let result = [];
-        if (agg) {
-          const condCfgAgg = {
-            enabled: defaults.enabled,
-            lvl: defaults.lvlReq,
-            isv: defaults.isReq,
-            mode: defaults.condMode,
-          };
-          for (const [part, bRec] of baseBucket.entries()) {
-            const bsum = baseTotal(baseBucket, part);
-            const srec = subBucket.get(part);
-            let ssum = 0;
-            if (srec) {
               if (aggOnly && condCfgAgg.enabled) {
                 for (const r of srec.rows)
                   if (checkByCond(r, condCfgAgg).ok) ssum += r.qty || 0;
               } else {
                 ssum = srec.rows.reduce((a, r) => a + (r.qty || 0), 0);
               }
-            }
-            const delta = ssum - bsum;
-            const desc =
-              bRec.descs && bRec.descs.size > 0
-                ? Array.from(bRec.descs)[0]
-                : "";
-            result.push({
-              _key: `${part}||AGG`,
-              _rk: `${String(part).toUpperCase().replace(/\s+/g, "")}||#AGG`,
-              품번: part,
-              디스크립션: desc,
-              기준수량: bsum,
-              제출수량: ssum,
-              차이: delta,
-              판정: delta === 0 ? "OK" : "NG",
-              _cond: aggOnly ? "조건합산" : "전체합산",
-            });
-          }
-        } else {
-          const out = [];
-          const usedByKey = new Map();
-          function takeNext(rows, cfg, used) {
-            for (let i = 0; i < rows.length; i++) {
-              if (used.has(i)) continue;
-              const ev = checkByCond(rows[i], cfg);
-              if (ev.ok) {
-                used.add(i);
-                return { row: rows[i], ok: true, reason: "" };
-              }
-            }
-            for (let i = 0; i < rows.length; i++) {
-              if (used.has(i)) continue;
-              const ev = checkByCond(rows[i], cfg);
-              used.add(i);
-              return { row: rows[i], ok: false, reason: ev.reason };
-            }
-            return null;
-          }
-          for (const br of baseRows) {
-            const cfg = condOfRow(br);
-            const part = br.part,
-              desc = br.desc;
-            const srec = subBucket.get(part);
-            if (!srec) continue;
-
-            if (!cfg.aggregate && cfg.baseMerge) {
-              const target =
-                document.getElementById("useDesc").checked &&
-                desc &&
-                srec.byDesc.has(desc)
-                  ? srec.byDesc.get(desc)
-                  : srec.rows;
-              let sqty = 0;
-              if (cfg.enabled && (cfg.lvl || cfg.isv)) {
-                for (const r of target)
-                  if (checkByCond(r, cfg).ok) sqty += r.qty || 0;
-              } else {
-                sqty = target.reduce((a, r) => a + (r.qty || 0), 0);
-              }
-              const bqty = baseTotal(baseBucket, part);
-              const delta = sqty - bqty;
-              out.push({
-                _key: `${part}||${desc || ""}||${br.occIdx}`,
-                _rk: rowKey(part, br.occIdx),
+              const delta = ssum - bsum;
+              result.push({
+                _key: `${part}||AGG`,
+                _rk: `${String(part).toUpperCase().replace(/\s+/g, "")}||#AGG`,
                 품번: part,
-                디스크립션: desc || "",
-                기준수량: bqty,
-                제출수량: sqty,
+                디스크립션: desc,
+                기준수량: bsum,
+                제출수량: ssum,
                 차이: delta,
                 판정: delta === 0 ? "OK" : "NG",
-                _cond: cfg.enabled ? "✓(기준합산·필터)" : "기준합산",
+                _cond: aggOnly ? "조건합산" : "전체합산",
               });
-              continue;
+            }
+          } else {
+            const out = [];
+            const usedByKey = new Map();
+            function takeNext(rows, cfg, used) {
+              for (let i = 0; i < rows.length; i++) {
+                if (used.has(i)) continue;
+                const ev = checkByCond(rows[i], cfg);
+                if (ev.ok) {
+                  used.add(i);
+                  return { row: rows[i], ok: true, reason: "" };
+                }
+              }
+              for (let i = 0; i < rows.length; i++) {
+                if (used.has(i)) continue;
+                const ev = checkByCond(rows[i], cfg);
+                used.add(i);
+                return { row: rows[i], ok: false, reason: ev.reason };
+              }
+              return null;
             }
 
-            if (cfg.aggregate) {
-              const target =
-                document.getElementById("useDesc").checked &&
-                desc &&
-                srec.byDesc.get(desc)
-                  ? srec.byDesc.get(desc)
-                  : srec.rows;
-              let sqty = 0;
-              if (cfg.enabled && (cfg.lvl || cfg.isv)) {
-                for (const r of target) {
-                  const ev = checkByCond(r, cfg);
-                  if (ev.ok) sqty += r.qty || 0;
+            for (const br of baseRows) {
+              const cfg = condOfRow(br);
+              const part = br.part,
+                desc = br.desc;
+              const srec = subBucket.get(part);
+
+              /* === 변경: 비집계 모드에서 품번이 없을 때, 같은 Description으로 전체에서 수집해 합산 + NG 고정 === */
+              if (!srec) {
+                const { list, parts } = findSubRowsByDesc(subBucket, desc);
+                let sqty = 0;
+                if (list.length) {
+                  if (cfg.enabled && (cfg.lvl || cfg.isv)) {
+                    for (const it of list)
+                      if (checkByCond(it.row, cfg).ok) sqty += it.row.qty || 0;
+                  } else {
+                    sqty = list.reduce((a, it) => a + (it.row.qty || 0), 0);
+                  }
                 }
-              } else {
-                sqty = target.reduce((a, r) => a + (r.qty || 0), 0);
+                const bqty = cfg.baseMerge
+                  ? baseTotal(baseBucket, part)
+                  : consumeBaseQty(baseBucket, part);
+                const delta = sqty - bqty;
+                // 🔁 메시지 통일: 품번이 없으면 항상 "품번불일치"
+                const hint = parts.length
+                  ? `품번 불일치(${parts.slice(0, 3).join(",")}${
+                      parts.length > 3 ? "…" : ""
+                    })`
+                  : "품번 불일치";
+                out.push({
+                  _key: `${part}||${desc || ""}||${br.occIdx}`,
+                  _rk: rowKey(part, br.occIdx),
+                  품번: part,
+                  디스크립션: desc || "",
+                  기준수량: bqty,
+                  제출수량: sqty,
+                  차이: delta,
+                  판정: "NG",
+                  _cond: hint,
+                });
+                continue;
               }
+              /* === 변경 끝 === */
+
+              if (!cfg.aggregate && cfg.baseMerge) {
+                const target =
+                  useDesc && desc && srec.byDesc.has(desc)
+                    ? srec.byDesc.get(desc)
+                    : srec.rows;
+                let sqty = 0;
+                if (cfg.enabled && (cfg.lvl || cfg.isv)) {
+                  for (const r of target)
+                    if (checkByCond(r, cfg).ok) sqty += r.qty || 0;
+                } else {
+                  sqty = target.reduce((a, r) => a + (r.qty || 0), 0);
+                }
+                const bqty = baseTotal(baseBucket, part);
+                const delta = sqty - bqty;
+                out.push({
+                  _key: `${part}||${desc || ""}||${br.occIdx}`,
+                  _rk: rowKey(part, br.occIdx),
+                  품번: part,
+                  디스크립션: desc || "",
+                  기준수량: bqty,
+                  제출수량: sqty,
+                  차이: delta,
+                  판정: delta === 0 ? "OK" : "NG",
+                  _cond: cfg.enabled ? "✓(기준합산·필터)" : "기준합산",
+                });
+                continue;
+              }
+
+              if (cfg.aggregate) {
+                const target =
+                  useDesc && desc && srec.byDesc.get(desc)
+                    ? srec.byDesc.get(desc)
+                    : srec.rows;
+                let sqty = 0;
+                if (cfg.enabled && (cfg.lvl || cfg.isv)) {
+                  for (const r of target) {
+                    const ev = checkByCond(r, cfg);
+                    if (ev.ok) sqty += r.qty || 0;
+                  }
+                } else {
+                  sqty = target.reduce((a, r) => a + (r.qty || 0), 0);
+                }
+                const bqty = cfg.baseMerge
+                  ? baseTotal(baseBucket, part)
+                  : consumeBaseQty(baseBucket, part);
+                const delta = sqty - bqty;
+                out.push({
+                  _key: `${part}||${desc || ""}||${br.occIdx}`,
+                  _rk: rowKey(part, br.occIdx),
+                  품번: part,
+                  디스크립션: desc || "",
+                  기준수량: bqty,
+                  제출수량: sqty,
+                  차이: delta,
+                  판정: delta === 0 ? "OK" : "NG",
+                  _cond:
+                    (cfg.baseMerge ? "기준합산" : "") +
+                    (cfg.aggregate
+                      ? (cfg.baseMerge ? " / " : "") + "품번합산"
+                      : ""),
+                });
+                continue;
+              }
+
+              let rows = [],
+                ukey = `${part}|*`;
+              if (useDesc && desc && srec.byDesc.has(desc)) {
+                rows = srec.byDesc.get(desc);
+                ukey = `${part}|${desc}`;
+              } else rows = srec.rows;
+
+              const used = usedByKey.get(ukey) || new Set();
+              const picked = takeNext(rows, cfg, used);
+              usedByKey.set(ukey, used);
+              if (!picked) continue;
+              if (
+                !picked.ok &&
+                !document.getElementById("showFailedCond").checked
+              )
+                continue;
+
               const bqty = cfg.baseMerge
                 ? baseTotal(baseBucket, part)
                 : consumeBaseQty(baseBucket, part);
+              const sqty = picked.row.qty;
               const delta = sqty - bqty;
               out.push({
                 _key: `${part}||${desc || ""}||${br.occIdx}`,
@@ -1241,463 +1349,222 @@ CAS Assembly	N	N	Y	OR	1	70"
                 제출수량: sqty,
                 차이: delta,
                 판정: delta === 0 ? "OK" : "NG",
-                _cond:
-                  (cfg.baseMerge ? "기준합산" : "") +
-                  (cfg.aggregate
-                    ? (cfg.baseMerge ? " / " : "") + "품번합산"
-                    : ""),
+                _cond: picked.ok
+                  ? cfg.baseMerge
+                    ? "✓(기준합산)"
+                    : "✓"
+                  : picked.reason || "✕",
               });
-              continue;
             }
-
-            let rows = [],
-              ukey = `${part}|*`;
-            if (
-              document.getElementById("useDesc").checked &&
-              desc &&
-              srec.byDesc.has(desc)
-            ) {
-              rows = srec.byDesc.get(desc);
-              ukey = `${part}|${desc}`;
-            } else rows = srec.rows;
-
-            const used = usedByKey.get(ukey) || new Set();
-            const picked = takeNext(rows, cfg, used);
-            usedByKey.set(ukey, used);
-            if (!picked) continue;
-            if (
-              !picked.ok &&
-              !document.getElementById("showFailedCond").checked
-            )
-              continue;
-
-            const bqty = cfg.baseMerge
-              ? baseTotal(baseBucket, part)
-              : consumeBaseQty(baseBucket, part);
-            const sqty = picked.row.qty;
-            const delta = sqty - bqty;
-            out.push({
-              _key: `${part}||${desc || ""}||${br.occIdx}`,
-              _rk: rowKey(part, br.occIdx),
-              품번: part,
-              디스크립션: desc || "",
-              기준수량: bqty,
-              제출수량: sqty,
-              차이: delta,
-              판정: delta === 0 ? "OK" : "NG",
-              _cond: picked.ok
-                ? cfg.baseMerge
-                  ? "✓(기준합산)"
-                  : "✓"
-                : picked.reason || "✕",
-            });
+            result = out;
           }
-          result = out;
+
+          renderTable(result, defaults);
+        } catch (err) {
+          alert(err.message || String(err));
         }
-
-        renderTable(result, defaults);
-      } catch (err) {
-        alert(err.message || String(err));
       }
-    }
 
-    /* ===== 사전설정 파서 (탭/공백/;/, 지원) ===== */
-    function parsePresetText(txt) {
-      const lines = (txt || "")
-        .replace(/\r/g, "")
-        .split("\n")
-        .map((s) => s.trimEnd())
-        .filter((s) => s.trim() !== "");
-      const smartSplit = (line) => {
-        if (line.includes("\t")) return line.split("\t").map((s) => s.trim());
-        if (line.includes(";")) return line.split(";").map((s) => s.trim());
-        if (line.includes(",")) return line.split(",").map((s) => s.trim());
-        return line.split(/\s{2,}/).map((s) => s.trim());
-      };
-      const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
-
-      const map = {};
-      for (const line of lines) {
-        const cols = smartSplit(line);
-        const desc = (cols[0] || "").trim();
-        if (!desc) continue;
-        // 순서: desc, baseMerge, aggregate, enabled, mode, lvl, isv
-        const base = yn(cols[1]);
-        const agg = yn(cols[2]);
-        const en = yn(cols[3]);
-        const mode =
-          (cols[4] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
-        const lvl = (cols[5] || "").trim();
-        const isv = (cols[6] || "").trim();
-        map[keyDesc(desc)] = {
-          baseMerge: base,
-          aggregate: agg,
-          enabled: en,
-          mode,
-          lvl,
-          isv,
+      function parsePresetText(txt) {
+        const lines = (txt || "")
+          .replace(/\r/g, "")
+          .split("\n")
+          .map((s) => s.trimEnd())
+          .filter((s) => s.trim() !== "");
+        const smartSplit = (line) => {
+          if (line.includes("\t")) return line.split("\t").map((s) => s.trim());
+          if (line.includes(";")) return line.split(";").map((s) => s.trim());
+          if (line.includes(",")) return line.split(",").map((s) => s.trim());
+          return line.split(/\s{2,}/).map((s) => s.trim());
         };
-      }
-      return map;
-    }
+        const yn = (v) => /^(Y|YES|TRUE|1)$/i.test(String(v || "").trim());
 
-    /* ===== 서버 프리셋 fetch → textarea 넣기 ===== */
-    let _serverPresetCache = null;
-    async function fetchRemotePresets() {
-      if (_serverPresetCache) return _serverPresetCache;
-      const res = await fetch(REMOTE_PRESET_URL, { cache: "no-cache" });
-      if (!res.ok)
-        throw new Error("서버 프리셋을 불러오지 못했습니다: " + res.status);
-      const json = await res.json();
-      _serverPresetCache = json;
-      return json;
-    }
-    function itemsToTSV(items) {
-      const yn = (b) => (b ? "Y" : "N");
-      return (items || [])
-        .map((it) =>
-          [
-            it.desc ?? "",
-            yn(!!it.baseMerge),
-            yn(!!it.aggregate),
-            yn(!!it.enabled),
-            String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
-            it.lvl ?? "",
-            it.isv ?? "",
-          ].join("\t")
-        )
-        .join("\n");
-    }
-    async function applyServerPresetToTextarea() {
-      try {
-        const type = document.getElementById("oilType").value; // "lube"|"dry"
-        const data = await fetchRemotePresets(); // {version, types:{lube:{label,items:[]}, dry:{...}}}
-        const items = data?.types?.[type]?.items || [];
-        const tsv = itemsToTSV(items);
-        const ta = document.getElementById("presetArea");
-        ta.value = tsv ? tsv + "\n" : "";
-        // descPresets=parsePresetText(ta.value||""); saveJson(PRESET_STORE_KEY, descPresets);
-        alert("서버 프리셋을 불러왔습니다.");
-      } catch (e) {
-        alert(
-          "프리셋 불러오기 실패: " + (e && e.message ? e.message : String(e))
-        );
-      }
-    }
-    document
-      .getElementById("btnFetchServer")
-      .addEventListener("click", applyServerPresetToTextarea);
-
-    /* ===== 초기화 ===== */
-    document.getElementById("resetAll").addEventListener("click", () => {
-      try {
-        localStorage.removeItem(PERCOND_STORE_KEY);
-        localStorage.removeItem(CHECK_STORE_KEY);
-        if (document.getElementById("resetAlsoPreset").checked) {
-          localStorage.removeItem(PRESET_STORE_KEY);
-          descPresets = {};
-          const pa = document.getElementById("presetArea");
-          if (pa) pa.value = "";
-        } else {
-          descPresets = loadJson(PRESET_STORE_KEY, "{}");
+        const map = {};
+        for (const line of lines) {
+          const cols = smartSplit(line);
+          const desc = (cols[0] || "").trim();
+          if (!desc) continue;
+          const base = yn(cols[1]);
+          const agg = yn(cols[2]);
+          const en = yn(cols[3]);
+          const mode =
+            (cols[4] || "OR").trim().toUpperCase() === "AND" ? "AND" : "OR";
+          const lvl = (cols[5] || "").trim();
+          const isv = (cols[6] || "").trim();
+          map[keyDesc(desc)] = {
+            baseMerge: base,
+            aggregate: agg,
+            enabled: en,
+            mode,
+            lvl,
+            isv,
+          };
         }
-        perCondMap = {};
-        checkMap = {};
-        document
-          .querySelectorAll("#out .rowchk")
-          .forEach((cb) => (cb.checked = false));
-        renderTable(Array.isArray(lastResult) ? lastResult : [], {
-          enabled: false,
-        });
-        alert("저장된 설정을 삭제했습니다.");
-      } catch (err) {
-        alert(
-          "초기화 중 오류: " + (err && err.message ? err.message : String(err))
-        );
+        return map;
       }
-    });
 
-    /* ===== 붙여넣기/옵션 자동 저장 & 복원 ===== */
-    function saveDraft() {
-      try {
-        localStorage.setItem(
-          DRAFT_KEYS.base,
-          document.getElementById("base").value || ""
-        );
-        localStorage.setItem(
-          DRAFT_KEYS.subm,
-          document.getElementById("subm").value || ""
-        );
-        const snapshot = {
-          useDesc: !!document.getElementById("useDesc")?.checked,
-          mergeBaseDup: !!document.getElementById("mergeBaseDup")?.checked,
-          advCondEnabled: !!document.getElementById("advCondEnabled")?.checked,
-          lvlCol: document.getElementById("lvlCol")?.value ?? "",
-          lvlVal: document.getElementById("lvlVal")?.value ?? "",
-          isCol: document.getElementById("isCol")?.value ?? "",
-          isVal: document.getElementById("isVal")?.value ?? "",
-          condMode: document.getElementById("condMode")?.value ?? "OR",
-          aggMode: !!document.getElementById("aggMode")?.checked,
-          aggCondOnly: !!document.getElementById("aggCondOnly")?.checked,
-          showCheckedOnly:
-            !!document.getElementById("showCheckedOnly")?.checked,
-          showFailedCond: !!document.getElementById("showFailedCond")?.checked,
-          presetArea: document.getElementById("presetArea")?.value ?? "",
-          filterOk: !!document.getElementById("filterOk")?.checked,
-          filterNg: !!document.getElementById("filterNg")?.checked,
-        };
-        localStorage.setItem(DRAFT_KEYS.opts, JSON.stringify(snapshot));
-      } catch (e) {}
-    }
-    function loadDraft() {
-      try {
-        const b = localStorage.getItem(DRAFT_KEYS.base);
-        const s = localStorage.getItem(DRAFT_KEYS.subm);
-        if (b !== null) document.getElementById("base").value = b;
-        if (s !== null) document.getElementById("subm").value = s;
-        const raw = localStorage.getItem(DRAFT_KEYS.opts);
-        if (raw) {
-          const o = JSON.parse(raw);
-          if ("useDesc" in o)
-            document.getElementById("useDesc").checked = !!o.useDesc;
-          if ("mergeBaseDup" in o)
-            document.getElementById("mergeBaseDup").checked = !!o.mergeBaseDup;
-          if ("advCondEnabled" in o)
-            document.getElementById("advCondEnabled").checked =
-              !!o.advCondEnabled;
-          if ("lvlCol" in o) document.getElementById("lvlCol").value = o.lvlCol;
-          if ("lvlVal" in o) document.getElementById("lvlVal").value = o.lvlVal;
-          if ("isCol" in o) document.getElementById("isCol").value = o.isCol;
-          if ("isVal" in o) document.getElementById("isVal").value = o.isVal;
-          if ("condMode" in o)
-            document.getElementById("condMode").value = o.condMode;
-          if ("aggMode" in o)
-            document.getElementById("aggMode").checked = !!o.aggMode;
-          if ("aggCondOnly" in o)
-            document.getElementById("aggCondOnly").checked = !!o.aggCondOnly;
-          if ("showCheckedOnly" in o)
-            document.getElementById("showCheckedOnly").checked =
-              !!o.showCheckedOnly;
-          if ("showFailedCond" in o)
-            document.getElementById("showFailedCond").checked =
-              !!o.showFailedCond;
-          if ("presetArea" in o && document.getElementById("presetArea"))
-            document.getElementById("presetArea").value = o.presetArea;
-          if ("filterOk" in o)
-            document.getElementById("filterOk").checked = !!o.filterOk;
-          if ("filterNg" in o)
-            document.getElementById("filterNg").checked = !!o.filterNg;
-        }
-      } catch (e) {}
-    }
-
-    // ✅ 자동 저장 이벤트 등록 통합 (input/textarea는 input, select/checkbox는 change)
-    let _draftTimer = null;
-    function scheduleSave() {
-      clearTimeout(_draftTimer);
-      _draftTimer = setTimeout(saveDraft, 200);
-    }
-    const autoSaveIds = [
-      "base",
-      "subm",
-      "presetArea",
-      "useDesc",
-      "mergeBaseDup",
-      "advCondEnabled",
-      "lvlCol",
-      "lvlVal",
-      "isCol",
-      "isVal",
-      "condMode",
-      "aggMode",
-      "aggCondOnly",
-      "showCheckedOnly",
-      "showFailedCond",
-      "filterOk",
-      "filterNg",
-    ];
-    autoSaveIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const evt =
-        el.tagName === "TEXTAREA" ||
-        (el.tagName === "INPUT" && el.type !== "checkbox")
-          ? "input"
-          : "change";
-      el.addEventListener(evt, scheduleSave);
-    });
-
-    loadDraft();
-
-    /* === 제출 헤더 정리: 5열 고정 추출 === */
-    function normalizeTextareaToNeededColumns(textareaId) {
-      const ta = document.getElementById(textareaId);
-      if (!ta) return;
-      const raw = ta.value || "";
-      if (!raw.trim()) {
-        alert("정리할 데이터가 없습니다.");
-        return;
+      let _serverPresetCache = null;
+      async function fetchRemotePresets() {
+        if (_serverPresetCache) return _serverPresetCache;
+        const res = await fetch(REMOTE_PRESET_URL, { cache: "no-cache" });
+        if (!res.ok)
+          throw new Error("서버 프리셋을 불러오지 못했습니다: " + res.status);
+        const json = await res.json();
+        _serverPresetCache = json;
+        return json;
       }
-      const lines = raw
-        .replace(/\r/g, "")
-        .split("\n")
-        .filter((x) => x.trim() !== "");
-      if (!lines.length) {
-        alert("해석 가능한 행이 없습니다.");
-        return;
+      function itemsToTSV(items) {
+        const yn = (b) => (b ? "Y" : "N");
+        return (items || [])
+          .map((it) =>
+            [
+              it.desc ?? "",
+              yn(!!it.baseMerge),
+              yn(!!it.aggregate),
+              yn(!!it.enabled),
+              String(it.mode || "OR").toUpperCase() === "AND" ? "AND" : "OR",
+              it.lvl ?? "",
+              it.isv ?? "",
+            ].join("\t")
+          )
+          .join("\n");
       }
-      const headIdx = lines.findIndex((x) => /\S/.test(x));
-      const headerLine = lines[headIdx];
-      let sep = "\t";
-      if (headerLine.includes("\t")) sep = "\t";
-      else if (headerLine.includes(";")) sep = ";";
-      else if (headerLine.includes(",")) sep = ",";
-      else sep = null;
-      const splitWithSep = (s) =>
-        sep ? s.split(sep).map((x) => x.trim()) : s.trim().split(/\s+/);
-      const normalizeHeaderLoose = (h) =>
-        String(h || "")
-          .toUpperCase()
-          .replace(/[.\s/_()\-\u200b]/g, "");
-      const headCells = splitWithSep(lines[headIdx]);
-      const headNorms = headCells.map(normalizeHeaderLoose);
-      const findIndex = (targets) => {
-        for (let i = 0; i < headNorms.length; i++) {
-          const h = headNorms[i];
-          if (targets.some((t) => h === t)) return i;
-          if (targets.some((t) => h.startsWith(t))) return i;
-          if (targets.some((t) => h.includes(t))) return i;
-        }
-        return -1;
-      };
-      const idxPart = findIndex([
-        "PARTNO",
-        "P/N",
-        "PN",
-        "PART",
-        "PARTNUMBER",
-        "품번",
-      ]);
-      const idxQty = findIndex(["QTY", "QUANTITY", "수량"]);
-      const idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
-      const idxLvl = findIndex(["LVL"]);
-      const idxIS = findIndex(["IS", "I.S"]);
-      if (idxPart < 0 || idxQty < 0) {
-        alert(
-          "필수 헤더(Part No, Qty, Description)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
-        );
-        return;
-      }
-      const outHeader = ["Part No", "Qty", "Description", "Lvl", "I.S"].join(
-        "\t"
-      );
-      const body = [];
-      for (let r = headIdx + 1; r < lines.length; r++) {
-        const row = lines[r];
-        if (!row || !row.trim()) continue;
-        const cells = splitWithSep(row, sep);
-        const get = (i) => (i >= 0 && i < cells.length ? cells[i] : "");
-        const part = String(get(idxPart)).trim();
-        const qty = String(get(idxQty)).trim();
-        const desc = String(get(idxDesc) || "").trim();
-        let lvl = String(get(idxLvl) || "").trim();
-        if (/^0\.\d+$/.test(lvl)) {
-          const depth = parseInt(lvl.split(".")[1], 10);
-          lvl = ".".repeat(depth) + depth;
-        }
-        const isv = String(get(idxIS) || "").trim();
-        if (!part && !qty) continue;
-        body.push([part, qty, desc, lvl, isv].join("\t"));
-      }
-      if (!body.length) {
-        alert("본문 데이터가 없습니다.");
-        return;
-      }
-      ta.value = outHeader + "\n" + body.join("\n");
-      if (typeof scheduleSave === "function") scheduleSave();
-      ta.focus();
-    }
-
-    /* === 지우기/정리 통합 핸들러 === */
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".clear-btn");
-      if (!btn) return;
-      const id = btn.getAttribute("data-target");
-      const act = btn.dataset.action;
-      if (act === "normalize") {
-        if (id !== "subm") return;
-        normalizeTextareaToNeededColumns(id);
-        return;
-      }
-      const ta = document.getElementById(id);
-      if (!ta) return;
-      ta.value = "";
-      ta.focus();
-      try {
-        if (id === "base") localStorage.setItem(DRAFT_KEYS.base, "");
-        if (id === "subm") localStorage.setItem(DRAFT_KEYS.subm, "");
-      } catch (e) {}
-      if (typeof scheduleSave === "function") scheduleSave();
-    });
-
-    /* ===== preset textarea: Tab 입력 가능 ===== */
-    (function enableTabInTextarea() {
-      const el = document.getElementById("presetArea");
-      if (!el) return;
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Tab") {
-          e.preventDefault();
-          const start = el.selectionStart,
-            end = el.selectionEnd,
-            val = el.value;
-          el.value = val.slice(0, start) + "\t" + val.slice(end);
-          el.selectionStart = el.selectionEnd = start + 1;
-          scheduleSave();
-        }
-      });
-    })();
-
-    /* ===== 사전설정 패널 열림 상태 저장 ===== */
-    (function keepPresetOpenState() {
-      const KEY = "preset_panel_open_v1";
-      const details = document.getElementById("presetPanel");
-      if (!details) return;
-      try {
-        const v = localStorage.getItem(KEY);
-        if (v !== null) details.open = v === "1";
-      } catch (e) {}
-      details.addEventListener("toggle", () => {
+      async function applyServerPresetToTextarea() {
         try {
-          localStorage.setItem(KEY, details.open ? "1" : "0");
-        } catch (e) {}
-      });
-    })();
-
-    window.addEventListener("beforeunload", saveDraft);
-
-    /* ===== 행 hover 하이라이트 ===== */
-    function bindRowHover(table) {
-      if (!table) return;
-      let lastRow = null;
-      function clear() {
-        if (lastRow) {
-          lastRow.classList.remove("rowhl");
-          lastRow = null;
+          const type = document.getElementById("oilType").value;
+          const data = await fetchRemotePresets();
+          const items = data?.types?.[type]?.items || [];
+          const tsv = itemsToTSV(items);
+          const ta = document.getElementById("presetArea");
+          ta.value = tsv ? tsv + "\n" : "";
+          alert("서버 프리셋을 불러왔습니다.");
+        } catch (e) {
+          alert(
+            "프리셋 불러오기 실패: " + (e && e.message ? e.message : String(e))
+          );
         }
       }
-      table.addEventListener("mousemove", (e) => {
-        const row = e.target.closest("tr");
-        if (!row || !table.contains(row) || row === lastRow) return;
-        clear();
-        row.classList.add("rowhl");
-        lastRow = row;
-      });
-      table.addEventListener("mouseleave", clear);
-    }
+      document
+        .getElementById("btnFetchServer")
+        .addEventListener("click", applyServerPresetToTextarea);
 
-    /* ===== 전역 옵션 UI 숨김 ===== */
-    if (typeof DISABLE_GLOBALS !== "undefined" && DISABLE_GLOBALS) {
-      [
+      document.getElementById("resetAll").addEventListener("click", () => {
+        try {
+          localStorage.removeItem(PERCOND_STORE_KEY);
+          localStorage.removeItem(CHECK_STORE_KEY);
+          if (document.getElementById("resetAlsoPreset").checked) {
+            localStorage.removeItem(PRESET_STORE_KEY);
+            descPresets = {};
+            const pa = document.getElementById("presetArea");
+            if (pa) pa.value = "";
+          } else {
+            descPresets = loadJson(PRESET_STORE_KEY, "{}");
+          }
+          perCondMap = {};
+          checkMap = {};
+          document
+            .querySelectorAll("#out .rowchk")
+            .forEach((cb) => (cb.checked = false));
+          renderTable(Array.isArray(lastResult) ? lastResult : [], {
+            enabled: false,
+          });
+          alert("저장된 설정을 삭제했습니다.");
+        } catch (err) {
+          alert(
+            "초기화 중 오류: " +
+              (err && err.message ? err.message : String(err))
+          );
+        }
+      });
+
+      function saveDraft() {
+        try {
+          localStorage.setItem(
+            DRAFT_KEYS.base,
+            document.getElementById("base").value || ""
+          );
+          localStorage.setItem(
+            DRAFT_KEYS.subm,
+            document.getElementById("subm").value || ""
+          );
+          const snapshot = {
+            useDesc: !!document.getElementById("useDesc")?.checked,
+            mergeBaseDup: !!document.getElementById("mergeBaseDup")?.checked,
+            advCondEnabled:
+              !!document.getElementById("advCondEnabled")?.checked,
+            lvlCol: document.getElementById("lvlCol")?.value ?? "",
+            lvlVal: document.getElementById("lvlVal")?.value ?? "",
+            isCol: document.getElementById("isCol")?.value ?? "",
+            isVal: document.getElementById("isVal")?.value ?? "",
+            condMode: document.getElementById("condMode")?.value ?? "OR",
+            aggMode: !!document.getElementById("aggMode")?.checked,
+            aggCondOnly: !!document.getElementById("aggCondOnly")?.checked,
+            showCheckedOnly:
+              !!document.getElementById("showCheckedOnly")?.checked,
+            showFailedCond:
+              !!document.getElementById("showFailedCond")?.checked,
+            presetArea: document.getElementById("presetArea")?.value ?? "",
+            filterOk: !!document.getElementById("filterOk")?.checked,
+            filterNg: !!document.getElementById("filterNg")?.checked,
+          };
+          localStorage.setItem(DRAFT_KEYS.opts, JSON.stringify(snapshot));
+        } catch (e) {}
+      }
+      function loadDraft() {
+        try {
+          const b = localStorage.getItem(DRAFT_KEYS.base);
+          const s = localStorage.getItem(DRAFT_KEYS.subm);
+          if (b !== null) document.getElementById("base").value = b;
+          if (s !== null) document.getElementById("subm").value = s;
+          const raw = localStorage.getItem(DRAFT_KEYS.opts);
+          if (raw) {
+            const o = JSON.parse(raw);
+            if ("useDesc" in o)
+              document.getElementById("useDesc").checked = !!o.useDesc;
+            if ("mergeBaseDup" in o)
+              document.getElementById("mergeBaseDup").checked =
+                !!o.mergeBaseDup;
+            if ("advCondEnabled" in o)
+              document.getElementById("advCondEnabled").checked =
+                !!o.advCondEnabled;
+            if ("lvlCol" in o)
+              document.getElementById("lvlCol").value = o.lvlCol;
+            if ("lvlVal" in o)
+              document.getElementById("lvlVal").value = o.lvlVal;
+            if ("isCol" in o) document.getElementById("isCol").value = o.isCol;
+            if ("isVal" in o) document.getElementById("isVal").value = o.isVal;
+            if ("condMode" in o)
+              document.getElementById("condMode").value = o.condMode;
+            if ("aggMode" in o)
+              document.getElementById("aggMode").checked = !!o.aggMode;
+            if ("aggCondOnly" in o)
+              document.getElementById("aggCondOnly").checked = !!o.aggCondOnly;
+            if ("showCheckedOnly" in o)
+              document.getElementById("showCheckedOnly").checked =
+                !!o.showCheckedOnly;
+            if ("showFailedCond" in o)
+              document.getElementById("showFailedCond").checked =
+                !!o.showFailedCond;
+            if ("presetArea" in o && document.getElementById("presetArea"))
+              document.getElementById("presetArea").value = o.presetArea;
+            if ("filterOk" in o)
+              document.getElementById("filterOk").checked = !!o.filterOk;
+            if ("filterNg" in o)
+              document.getElementById("filterNg").checked = !!o.filterNg;
+          }
+        } catch (e) {}
+      }
+
+      let _draftTimer = null;
+      function scheduleSave() {
+        clearTimeout(_draftTimer);
+        _draftTimer = setTimeout(saveDraft, 200);
+      }
+      const autoSaveIds = [
+        "base",
+        "subm",
+        "presetArea",
+        "useDesc",
         "mergeBaseDup",
         "advCondEnabled",
         "lvlCol",
@@ -1707,12 +1574,203 @@ CAS Assembly	N	N	Y	OR	1	70"
         "condMode",
         "aggMode",
         "aggCondOnly",
-      ].forEach((id) => {
+        "showCheckedOnly",
+        "showFailedCond",
+        "filterOk",
+        "filterNg",
+      ];
+      autoSaveIds.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
-        const holder = el.closest("label") || el.closest(".bar");
-        if (holder) holder.style.display = "none";
+        const evt =
+          el.tagName === "TEXTAREA" ||
+          (el.tagName === "INPUT" && el.type !== "checkbox")
+            ? "input"
+            : "change";
+        el.addEventListener(evt, scheduleSave);
       });
-    }
-  </script>
+
+      loadDraft();
+
+      function normalizeTextareaToNeededColumns(textareaId) {
+        const ta = document.getElementById(textareaId);
+        if (!ta) return;
+        const raw = ta.value || "";
+        if (!raw.trim()) {
+          alert("정리할 데이터가 없습니다.");
+          return;
+        }
+        const lines = raw
+          .replace(/\r/g, "")
+          .split("\n")
+          .filter((x) => x.trim() !== "");
+        if (!lines.length) {
+          alert("해석 가능한 행이 없습니다.");
+          return;
+        }
+        const headIdx = lines.findIndex((x) => /\S/.test(x));
+        const headerLine = lines[headIdx];
+        let sep = "\t";
+        if (headerLine.includes("\t")) sep = "\t";
+        else if (headerLine.includes(";")) sep = ";";
+        else if (headerLine.includes(",")) sep = ",";
+        else sep = null;
+        const splitWithSep = (s) =>
+          sep ? s.split(sep).map((x) => x.trim()) : s.trim().split(/\s+/);
+        const normalizeHeaderLoose = (h) =>
+          String(h || "")
+            .toUpperCase()
+            .replace(/[.\s/_()\-\u200b]/g, "");
+        const headCells = splitWithSep(lines[headIdx]);
+        const headNorms = headCells.map(normalizeHeaderLoose);
+        const findIndex = (targets) => {
+          for (let i = 0; i < headNorms.length; i++) {
+            const h = headNorms[i];
+            if (targets.some((t) => h === t)) return i;
+            if (targets.some((t) => h.startsWith(t))) return i;
+            if (targets.some((t) => h.includes(t))) return i;
+          }
+          return -1;
+        };
+        const idxPart = findIndex([
+          "PARTNO",
+          "P/N",
+          "PN",
+          "PART",
+          "PARTNUMBER",
+          "품번",
+        ]);
+        const idxQty = findIndex(["QTY", "QUANTITY", "수량"]);
+        const idxDesc = findIndex(["DESCRIPTION", "DESC", "디스크립션"]);
+        const idxLvl = findIndex(["LVL"]);
+        const idxIS = findIndex(["IS", "I.S"]);
+        if (idxPart < 0 || idxQty < 0) {
+          alert(
+            "필수 헤더(Part No, Qty, Description)를 찾지 못했습니다. 제출 텍스트의 헤더를 확인하세요."
+          );
+          return;
+        }
+        const outHeader = ["Part No", "Qty", "Description", "Lvl", "I.S"].join(
+          "\t"
+        );
+        const body = [];
+        for (let r = headIdx + 1; r < lines.length; r++) {
+          const row = lines[r];
+          if (!row || !row.trim()) continue;
+          const cells = splitWithSep(row, sep);
+          const get = (i) => (i >= 0 && i < cells.length ? cells[i] : "");
+          const part = String(get(idxPart)).trim();
+          const qty = String(get(idxQty)).trim();
+          const desc = String(get(idxDesc) || "").trim();
+          let lvl = String(get(idxLvl) || "").trim();
+          if (/^0\.\d+$/.test(lvl)) {
+            const depth = parseInt(lvl.split(".")[1], 10);
+            lvl = ".".repeat(depth) + depth;
+          }
+          const isv = String(get(idxIS) || "").trim();
+          if (!part && !qty) continue;
+          body.push([part, qty, desc, lvl, isv].join("\t"));
+        }
+        if (!body.length) {
+          alert("본문 데이터가 없습니다.");
+          return;
+        }
+        ta.value = outHeader + "\n" + body.join("\n");
+        if (typeof scheduleSave === "function") scheduleSave();
+        ta.focus();
+      }
+
+      document.addEventListener("click", (e) => {
+        const btn = e.target.closest(".clear-btn");
+        if (!btn) return;
+        const id = btn.getAttribute("data-target");
+        const act = btn.dataset.action;
+        if (act === "normalize") {
+          if (id !== "subm") return;
+          normalizeTextareaToNeededColumns(id);
+          return;
+        }
+        const ta = document.getElementById(id);
+        if (!ta) return;
+        ta.value = "";
+        ta.focus();
+        try {
+          if (id === "base") localStorage.setItem(DRAFT_KEYS.base, "");
+          if (id === "subm") localStorage.setItem(DRAFT_KEYS.subm, "");
+        } catch (e) {}
+        if (typeof scheduleSave === "function") scheduleSave();
+      });
+
+      (function enableTabInTextarea() {
+        const el = document.getElementById("presetArea");
+        if (!el) return;
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            const start = el.selectionStart,
+              end = el.selectionEnd,
+              val = el.value;
+            el.value = val.slice(0, start) + "\t" + val.slice(end);
+            el.selectionStart = el.selectionEnd = start + 1;
+            scheduleSave();
+          }
+        });
+      })();
+
+      (function keepPresetOpenState() {
+        const KEY = "preset_panel_open_v1";
+        const details = document.getElementById("presetPanel");
+        if (!details) return;
+        try {
+          const v = localStorage.getItem(KEY);
+          if (v !== null) details.open = v === "1";
+        } catch (e) {}
+        details.addEventListener("toggle", () => {
+          try {
+            localStorage.setItem(KEY, details.open ? "1" : "0");
+          } catch (e) {}
+        });
+      })();
+
+      window.addEventListener("beforeunload", saveDraft);
+
+      function bindRowHover(table) {
+        if (!table) return;
+        let lastRow = null;
+        function clear() {
+          if (lastRow) {
+            lastRow.classList.remove("rowhl");
+            lastRow = null;
+          }
+        }
+        table.addEventListener("mousemove", (e) => {
+          const row = e.target.closest("tr");
+          if (!row || !table.contains(row) || row === lastRow) return;
+          clear();
+          row.classList.add("rowhl");
+          lastRow = row;
+        });
+        table.addEventListener("mouseleave", clear);
+      }
+
+      if (typeof DISABLE_GLOBALS !== "undefined" && DISABLE_GLOBALS) {
+        [
+          "mergeBaseDup",
+          "advCondEnabled",
+          "lvlCol",
+          "lvlVal",
+          "isCol",
+          "isVal",
+          "condMode",
+          "aggMode",
+          "aggCondOnly",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const holder = el.closest("label") || el.closest(".bar");
+          if (holder) holder.style.display = "none";
+        });
+      }
+    </script>
+  </body>
 </html>
