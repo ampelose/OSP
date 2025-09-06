@@ -934,7 +934,9 @@ CAS Assembly	N	N	Y	OR	1	70"
 
         const dl = document.getElementById("dl");
         dl.style.display = rows.length ? "inline-block" : "none";
+        // ↓ 기존 dl.onclick = () => { ... } 를 이 코드로 통째로 교체
         dl.onclick = () => {
+          // 1) 열 헤더(순서 고정)
           const cols = [
             "No.",
             "품번",
@@ -943,40 +945,49 @@ CAS Assembly	N	N	Y	OR	1	70"
             "제출수량",
             "차이",
             "판정",
-            "조건",
-            "확인",
-            "기준합산",
-            "품번합산",
           ];
-          const body = (
-            document.getElementById("showCheckedOnly").checked
-              ? rows.filter((r) => !checkMap[r._key])
-              : rows
-          )
+
+          // 2) CSV 안전 이스케이프 (콤마/줄바꿈/따옴표 모두 처리)
+          const csvEscape = (v) => {
+            const s = String(v ?? "");
+            // 줄바꿈 통일 (엑셀/윈도우 호환)
+            const t = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+            // 따옴표 이스케이프
+            const q = t.replace(/"/g, '""');
+            return `"${q}"`;
+          };
+
+          // 3) 내보낼 대상 행 선택 (미확인만 내보내기 옵션 유지)
+          const rowsToExport = document.getElementById("showCheckedOnly")
+            .checked
+            ? rows.filter((r) => !checkMap[r._key])
+            : rows;
+
+          // 4) 본문 구성
+          const body = rowsToExport
             .map((r, i) => {
               const pKey = String(r["품번"] || "")
                 .toUpperCase()
                 .replace(/\s+/g, "");
               const partCfg = perCondMap[pKey] || {};
-              return [
-                i + 1,
-                r["품번"],
-                r["디스크립션"],
-                r["기준수량"],
-                r["제출수량"],
-                r["차이"],
-                r["판정"],
-                r["_cond"] || "",
-                checkMap[r._key] ? "Y" : "",
-                partCfg.baseMerge ? "Y" : "",
-                partCfg.aggregate ? "Y" : "",
-              ]
-                .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
-                .join(",");
+              const line = [
+                i + 1, // No.
+                r["품번"], // 품번
+                r["디스크립션"], // 디스크립션
+                r["기준수량"], // 기준수량
+                r["제출수량"], // 제출수량
+                r["차이"], // 차이
+                r["판정"], // 판정
+              ];
+              return line.map(csvEscape).join(",");
             })
-            .join("\n");
-          const csv = cols.map((s) => `"${s}"`).join(",") + "\n" + body;
-          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            .join("\r\n");
+
+          // 5) UTF-8 BOM + CRLF로 저장 (엑셀/한글 호환)
+          const header = cols.map(csvEscape).join(",");
+          const csvText = "\uFEFF" + header + "\r\n" + body;
+
+          const blob = new Blob([csvText], { type: "text/csv;charset=utf-8" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
