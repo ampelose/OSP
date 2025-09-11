@@ -198,6 +198,126 @@
           "mode": "OR",
           "lvl": "3",
           "isv": ""
+        },
+        {
+          "desc": "압축기 베어링 온도센서 조립용",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "베인모터",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "불기어 조립용 볼트류 BLOCK",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "모터 쿨링 라인 단일화 브라켓",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "모터 쿨링 라인 단일화 가스켓",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-SPACER",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-LABYRINTH 1ST",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-IMPELLER PLATE",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-BEARING HOUSING",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-BEARING COVER",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-IMPELLER-NUT",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
+        },
+        {
+          "desc": "-IMPELLER-SPACER",
+          "baseMerge": true,
+          "aggregate": false,
+          "enabled": true,
+          "mode": "OR",
+          "lvl": "3",
+          "isv": "",
+          "hide": "true"
         }
       ]
     }
